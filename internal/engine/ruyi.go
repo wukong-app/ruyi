@@ -5,8 +5,11 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/wukong-app/ruyi/pkg/base/contract"
 	"github.com/wukong-app/ruyi/pkg/base/exception"
 )
+
+var _ contract.Ruyi = (*Ruyi)(nil)
 
 func NewRuyi() *Ruyi {
 	return &Ruyi{
