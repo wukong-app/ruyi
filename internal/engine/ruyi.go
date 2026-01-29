@@ -19,7 +19,7 @@ func NewRuyi() *Ruyi {
 	}
 }
 
-// Ruyi is the implementation of ruyi.Ruyi
+// Ruyi is the implementation of contract.Ruyi
 type Ruyi struct {
 	mx          sync.Mutex
 	description string
