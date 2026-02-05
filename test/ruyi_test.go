@@ -8,7 +8,11 @@ import (
 )
 
 func TestRuyiExpandAndShrink(t *testing.T) {
-	ry := ruyi.New()
+	ry, err := ruyi.New()
+	if err != nil {
+		t.Fatalf("Failed to create Ruyi: %v", err)
+	}
+	
 	fmt.Printf("Ruyi description is %v \n", ry.GetDescription())
 	fmt.Printf("Ruyi size is %v \n", ry.GetSize())
 

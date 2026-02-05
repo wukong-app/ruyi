@@ -5,20 +5,20 @@ import (
 	"fmt"
 )
 
-// New 创建错误对象
-// @param message 错误信息模板
+// Errorf 创建错误对象
+// @param format 错误信息模板
 // @param msgArgs 错误信息参数填充
 // @return error 错误对象
-func New(message string, msgArgs ...any) error {
-	return fmt.Errorf(message, msgArgs...)
+func Errorf(format string, msgArgs ...any) error {
+	return fmt.Errorf(format, msgArgs...)
 }
 
-// Wrap 包装错误
+// Wrapf 包装错误
 // @param err 原始错误对象
 // @param message 上下文信息模板
 // @param msgArgs 上下文信息参数填充
 // @return error 新的错误对象
-func Wrap(err error, message string, msgArgs ...any) error {
+func Wrapf(err error, message string, msgArgs ...any) error {
 	return fmt.Errorf("%s: %w", fmt.Sprintf(message, msgArgs...), err)
 }
 

@@ -5,25 +5,45 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/wukong-app/ruyi/pkg/base/contract"
-	"github.com/wukong-app/ruyi/pkg/base/exception"
+	"github.com/wukong-app/ruyi/internal/core"
+	"github.com/wukong-app/ruyi/pkg/contract"
+	"github.com/wukong-app/ruyi/pkg/exception"
 )
 
 var _ contract.Ruyi = (*Ruyi)(nil)
 
-func NewRuyi() *Ruyi {
+// NewRuyi returns a new Ruyi.
+func NewRuyi(
+	converterRegistry core.ConverterRegistry,
+) contract.Ruyi {
+	if converterRegistry == nil {
+		panic("converterRegistry is nil")
+	}
+
 	return &Ruyi{
+		// Ruyi Jingu Bang
 		mx:          sync.Mutex{},
 		description: "The Ruyi Jingu Bang, Sun Wukong’s magic staff, weighs thirteen thousand five hundred jin.",
 		size:        20,
+
+		// Dependencies
+		converterRegister: converterRegistry, // converter 注册中心
 	}
 }
 
 // Ruyi is the implementation of contract.Ruyi
 type Ruyi struct {
+	//////////////////////////////
+	//		Ruyi Jingu Bang		//
+	//////////////////////////////
 	mx          sync.Mutex
 	description string
 	size        int32
+
+	//////////////////////////////
+	//		Dependencies		//
+	//////////////////////////////
+	converterRegister core.ConverterRegistry // converter 注册中心
 }
 
 func (s *Ruyi) GetDescription() string {
