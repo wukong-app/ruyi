@@ -1,23 +1,25 @@
 package core
 
+import "github.com/wukong-app/ruyi/pkg/contract"
+
 // 内置概念
 var (
-	png  = newConcept("png", File)
-	jpeg = newConcept("jpeg", File, "jpg", "jpe")
+	png  = newConcept(contract.PNG, contract.File)
+	jpeg = newConcept(contract.JPEG, contract.File, contract.JPG, contract.JPE)
 )
 
 // Concept 概念
 type Concept struct {
 	// name 名称
-	name string
+	name contract.ConceptName
 	// kind 类型
-	kind Kind
+	kind contract.Kind
 	// aliases 别名
-	aliases []string
+	aliases []contract.ConceptName
 }
 
 // newConcept 创建概念
-func newConcept(name string, kind Kind, aliases ...string) Concept {
+func newConcept(name contract.ConceptName, kind contract.Kind, aliases ...contract.ConceptName) Concept {
 	concept := Concept{
 		name:    name,
 		kind:    kind,
@@ -28,20 +30,20 @@ func newConcept(name string, kind Kind, aliases ...string) Concept {
 }
 
 // NormalizeConcept 根据name 或 alias 获取概念
-func NormalizeConcept(name string) (concept Concept, exist bool) {
+func NormalizeConcept(name contract.ConceptName) (concept Concept, exist bool) {
 	return _conceptCache.getFromByNameOrAliasesMap(name)
 }
 
-func (s Concept) Name() string {
+func (s Concept) Name() contract.ConceptName {
 	return s.name
 }
 
-func (s Concept) Kind() Kind {
+func (s Concept) Kind() contract.Kind {
 	return s.kind
 }
 
-func (s Concept) Aliases() []string {
-	copyAliases := make([]string, len(s.aliases))
+func (s Concept) Aliases() []contract.ConceptName {
+	copyAliases := make([]contract.ConceptName, len(s.aliases))
 	copy(copyAliases, s.aliases)
 	return copyAliases
 }

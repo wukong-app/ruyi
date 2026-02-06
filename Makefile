@@ -1,5 +1,7 @@
 APP_ROOT := $(CURDIR)
 INTERNAL_PACKAGE := "$(APP_ROOT)/internal"
+CMD_RUYI := "$(APP_ROOT)/cmd/ruyi"
+OUTPUT_DIR := "$(APP_ROOT)/output"
 
 export GO111MODULE=on
 
@@ -7,8 +9,14 @@ export GO111MODULE=on
 all: build
 
 prepare: wire
+	@mkdir -p $(OUTPUT_DIR)
 
 build: prepare
+	@echo $(APP_ROOT)
+	@echo "do build"
+	@mkdir -p $(OUTPUT_DIR)/ruyi
+	@go build -o $(OUTPUT_DIR)/ruyi/ruyi $(CMD_RUYI)
+	@echo "build done"
 
 wire:
 	@echo "do wire"

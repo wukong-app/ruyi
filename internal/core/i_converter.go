@@ -2,15 +2,22 @@ package core
 
 import "context"
 
-// Converter 转换器
+// Converter 泛型接口，定义具体 Concept 间的转换逻辑
 type Converter[T any] interface {
-
-	// From 来源类型
+	// From 返回源 Concept
 	From() Concept
 
-	// To 目标类型
+	// To 返回目标 Concept
 	To() Concept
 
 	// Convert 执行转换
-	Convert(ctx context.Context, in Value[T]) (out Value[T], err error)
+	//
+	// 参数:
+	//   - ctx: 上下文，用于取消、超时控制
+	//   - in: 待转换的值，类型为 T
+	//
+	// 返回值:
+	//   - out: 转换后的值，类型为 T
+	//   - err: 转换失败时返回错误
+	Convert(ctx context.Context, in T) (out T, err error)
 }

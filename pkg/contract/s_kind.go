@@ -1,4 +1,4 @@
-package core
+package contract
 
 // Kind 类型
 type Kind string

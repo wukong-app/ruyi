@@ -22,6 +22,13 @@ func Wrapf(err error, message string, msgArgs ...any) error {
 	return fmt.Errorf("%s: %w", fmt.Sprintf(message, msgArgs...), err)
 }
 
+// Join 将多个错误对象合并成一个错误对象
+// @param errs 错误对象列表
+// @return error 合并后的错误对象
+func Join(errs ...error) error {
+	return errors.Join(errs...)
+}
+
 // Is 判断 err 树中的任意 error 是否与 target 匹配。
 // @param err 原始错误对象
 // @param target 目标错误对象
