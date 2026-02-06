@@ -23,8 +23,8 @@ var _ contract.Ruyi = (*Ruyi)(nil)
 //
 // 说明:
 //
-//	NewRuyi 用于对外创建 Ruyi 实例，隐藏内部具体实现。
-//	调用方无需关心 Ruyi 的内部细节，只通过接口使用核心功能。
+//	NewRuyi 用于对外创建 Ruyi 实例，隐藏内部实现细节。
+//	调用方无需关心内部结构，只通过接口使用核心功能。
 //	如果 converterRegistry 为 nil，则会 panic。
 func NewRuyi(converterRegistry core.ConverterRegistry) contract.Ruyi {
 	if converterRegistry == nil {
@@ -38,22 +38,22 @@ func NewRuyi(converterRegistry core.ConverterRegistry) contract.Ruyi {
 	}
 }
 
-// Ruyi 是 contract.Ruyi 接口的具体实现
+// Ruyi 是 contract.Ruyi 接口的具体实现。
 //
 // 说明:
 //
-//	1、核心功能：提供各种 Concept 间的转换能力。
+//	1、核心功能：提供 Concept 间的数据转换能力。
 //	2、彩蛋功能：提供趣味性接口（获取描述、尺寸调整），不影响核心逻辑。
 type Ruyi struct {
 	//////////////////////////////
-	//		Ruyi Jingu Bang（彩蛋属性）	//
+	//	彩蛋属性
 	//////////////////////////////
 	mx          sync.Mutex // 用于保护 size 读写
 	description string     // Ruyi 的描述信息
 	size        int32      // 当前尺寸
 
 	//////////////////////////////
-	//		依赖组件		//
+	//	依赖组件
 	//////////////////////////////
 	converterRegister core.ConverterRegistry // Converter 注册中心
 }
@@ -65,7 +65,7 @@ type Ruyi struct {
 //
 // 说明:
 //
-//	此方法用于趣味展示，与核心转换功能无关。
+//	此方法仅用于趣味展示，不影响核心转换功能。
 func (s *Ruyi) GetDescription() string {
 	return s.description
 }
@@ -77,7 +77,7 @@ func (s *Ruyi) GetDescription() string {
 //
 // 说明:
 //
-//	仅用于趣味展示，真实业务逻辑不依赖此值。
+//	此方法仅用于趣味展示，真实业务逻辑不依赖此值。
 func (s *Ruyi) GetSize() int32 {
 	return atomic.LoadInt32(&s.size)
 }
@@ -124,7 +124,7 @@ func (s *Ruyi) Shrink() (int32, error) {
 	return atomic.AddInt32(&s.size, -1), nil
 }
 
-// CanConvert 判断是否存在支持指定转换的 Converter
+// CanConvert 判断是否存在支持指定转换的 Converter（核心功能）
 //
 // 参数:
 //   - ctx: 上下文，用于控制超时、取消等
@@ -137,9 +137,7 @@ func (s *Ruyi) Shrink() (int32, error) {
 //
 // 说明:
 //
-//	此函数用于能力探测（Capability Check），可以在调用 Convert 之前
-//	先判断是否支持某种转换。函数内部通过注册器查找对应的 Converter。
-//	返回 true 表示可以进行转换，返回 false 表示不支持该转换。
+//	此函数用于能力探测（Capability Check），可在调用 Convert 前判断是否支持某种转换。
 func (s *Ruyi) CanConvert(ctx context.Context, kind contract.Kind, from contract.ConceptName, to contract.ConceptName) bool {
 	converter := s.converterRegister.Find(ctx, kind, from, to)
 	return converter != nil
@@ -147,102 +145,56 @@ func (s *Ruyi) CanConvert(ctx context.Context, kind contract.Kind, from contract
 
 // Convert 通用转换函数（核心功能）
 //
+// 功能说明:
+//
+//	Convert 是 Ruyi 框架的核心方法，用于执行各种 Concept 间的数据转换。
+//	它统一处理不同 Kind 的转换逻辑，例如文件、货币、时间、数字等。
+//	函数只负责调用注册的 Converter 并返回原始结果，由外层封装方法负责类型断言与边界安全检查。
+//
 // 参数:
-//   - ctx: 上下文，用于控制超时、取消等
-//   - kind: 转换类型（Kind），例如文件、货币、时间等
-//   - fromName: 源 Concept 名称
-//   - toName: 目标 Concept 名称
-//   - fromData: 待转换的数据（any 类型）
+//   - ctx: 上下文对象，可用于控制超时、取消等操作。
+//   - kind: 转换类型（Kind），例如 File、Currency、Time、Number 等。
+//   - fromName: 源 Concept 名称，标识待转换的数据类型。
+//   - toName: 目标 Concept 名称，标识转换后的数据类型。
+//   - fromData: 待转换的数据，统一使用 []byte 表示。
 //
 // 返回值:
-//   - toData: 转换后的数据（any 类型），具体类型由外层或封装方法决定
-//   - err: 转换失败时返回的错误，包括找不到转换器或执行失败等
+//   - toData: 转换后的数据，具体类型由外层封装方法决定。
+//   - err: 转换失败时返回的错误，包括找不到转换器或执行失败等。
 //
-// 说明:
+// 使用说明:
 //
-//	1、首先通过注册器查找指定 kind、from -> to 的 Converter。
-//	    如果找不到对应 Converter，则返回 exception.ErrNoSupportedConverter。
-//	2、调用 Converter 执行转换，将 fromData 转换为目标类型。
-//	    如果转换过程中出现错误，返回 exception.ErrConvertFailed 并封装具体错误信息。
-//	3、返回 Converter 输出值，由外层或封装方法（如 ConvertFile、ConvertCurrency）做类型断言和边界安全检查。
-//	4、Convert 本身不对输出类型进行断言，以保证通用性。
-//	5、外部调用方应根据 kind 或封装方法进行类型安全处理。
-func (s *Ruyi) Convert(ctx context.Context, kind contract.Kind, fromName contract.ConceptName, toName contract.ConceptName, fromData any) (toData any, err error) {
-	// 1、查找对应 Converter
+//	1、调用前可通过 CanConvert 进行能力探测。
+//	2、执行转换时，会通过注册器查找指定 kind、from -> to 的 Converter 并调用其 Convert 方法。
+//	3、转换成功后返回 Converter 输出，由外层封装方法进行类型断言。
+//	4、不同 Kind 的数据处理方式不同，调用方应使用对应封装方法。
+func (s *Ruyi) Convert(
+	ctx context.Context,
+	kind contract.Kind,
+	fromName contract.ConceptName,
+	toName contract.ConceptName,
+	fromData []byte,
+) (toData []byte, err error) {
+	// 查找对应 Converter
 	converter := s.converterRegister.Find(ctx, kind, fromName, toName)
 	if converter == nil {
-		return nil, exception.Wrapf(exception.ErrNoSupportedConverter, "converter not found for kind=%s: %s -> %s", kind, fromName, toName)
+		return nil, exception.Wrapf(
+			exception.ErrNoSupportedConverter,
+			"converter not found for kind=%s: %s -> %s",
+			kind, fromName, toName,
+		)
 	}
 
-	// 2、调用 Converter 执行转换
+	// 调用 Converter 执行转换
 	out, err := converter.Convert(ctx, fromData)
 	if err != nil {
-		return nil, exception.Wrapf(exception.Join(err, exception.ErrConvertFailed), "conversion failed for kind=%s: %s -> %s", kind, fromName, toName)
+		return nil, exception.Wrapf(
+			exception.Join(err, exception.ErrConvertFailed),
+			"conversion failed for kind=%s: %s -> %s",
+			kind, fromName, toName,
+		)
 	}
 
-	// 3、返回原始输出，由外层或封装方法做类型断言
+	// 返回原始输出，由外层封装方法做类型断言
 	return out, nil
-}
-
-// ConvertFile 将源 Concept 表示的文件数据转换为目标 Concept 表示的文件数据
-//
-// 参数:
-//   - ctx: 上下文，用于控制超时、取消等
-//   - fromName: 源 Concept 名称（例如 JPEG）
-//   - toName: 目标 Concept 名称（例如 PNG）
-//   - fromData: 源文件的字节数据
-//
-// 返回值:
-//   - []byte: 转换后的目标文件字节数据
-//   - error: 转换失败时返回错误，包括以下情况:
-//     1、exception.ErrNoSupportedConverter 找不到对应 Converter
-//     2、exception.ErrConvertFailed Converter 执行出错
-//     3、exception.ErrInvalidConverterOutput Converter 返回值类型不符合预期
-//
-// 说明:
-//
-//	1、首先在注册器中查找对应的文件转换器（Converter）。
-//	2、调用 Converter 执行转换。
-//	3、使用 assertOutput[[]byte] 对 Converter 返回值进行类型断言，
-//	    确保边界层类型安全，防止框架契约被破坏。
-//
-//	注意：
-//	  - fromData 和返回值都使用 []byte，适合文件类转换。
-//	  - 类型不匹配时会返回异常，标记为内部错误。
-func (s *Ruyi) ConvertFile(ctx context.Context, fromName contract.ConceptName, toName contract.ConceptName, fromData []byte) ([]byte, error) {
-	// 1、调用通用 Convert 方法
-	out, err := s.Convert(ctx, contract.File, fromName, toName, fromData)
-	if err != nil {
-		return nil, err
-	}
-
-	// 2、对输出进行类型断言，保证边界层类型安全
-	return assertOutput[[]byte](out, fromName, toName)
-}
-
-// assertOutput[T any] 对 Converter 输出进行类型断言，保证边界层类型安全
-//
-// 参数:
-//   - out: Converter 返回值（any 类型）
-//   - from: 源 Concept 名称
-//   - to: 目标 Concept 名称
-//
-// 返回值:
-//   - T: 断言成功时返回 T 类型的值，失败返回 T 的零值
-//   - error: 类型不匹配时返回 ErrInvalidConverterOutput 封装的错误
-//
-// 说明:
-//
-//	用于确保 Converter 遵循契约，防止返回不符合预期的类型。
-//	错误信息中包含 from/to 信息，方便排查问题。
-func assertOutput[T any](out any, from, to contract.ConceptName) (T, error) {
-	var zero T
-	data, ok := out.(T)
-	if ok {
-		return data, nil
-	}
-
-	return zero, exception.Wrapf(exception.Join(
-		exception.ErrInvalidConverterOutput, exception.ErrInternal,
-	), "file converter contract violation: %s -> %s, wanted %s,  got %T", from, to, zero, out)
 }

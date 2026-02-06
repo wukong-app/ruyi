@@ -16,7 +16,8 @@ import (
 
 // New returns a new Ruyi.
 func New() (contract.Ruyi, error) {
-	converterRegistry, err := register.NewConverterRegistry()
+	v := ProvideConverters()
+	converterRegistry, err := register.NewConverterRegistry(v)
 	if err != nil {
 		return nil, err
 	}

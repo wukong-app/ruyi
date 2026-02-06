@@ -13,12 +13,12 @@ import (
 	"github.com/wukong-app/ruyi/internal/core"
 )
 
-var _ core.Converter[[]byte] = (*pngToJpegConverter)(nil)
+var _ core.Converter = (*pngToJpegConverter)(nil)
 
 // pngToJpegConverter PNG -> JPEG 文件转换器
 type pngToJpegConverter struct{}
 
-func NewPNGToJPEGConverter() core.Converter[[]byte] {
+func NewPNGToJPEGConverter() core.Converter {
 	return &pngToJpegConverter{}
 }
 

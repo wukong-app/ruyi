@@ -8,6 +8,7 @@ import (
 
 // providerSet combines all dependencies for ruyi
 var providerSet = wire.NewSet(
+	ProvideConverters,             // 所有 Converter
 	register.NewConverterRegistry, // Converter 注册中心
 
 	// 在此之前添加依赖项↑↑↑↑↑↑↑↑↑↑

@@ -64,7 +64,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		outData, err = r.ConvertFile(ctx, fromName, toName, fromData)
+		outData, err = r.Convert(ctx, contract.File, fromName, toName, fromData)
 		if err != nil {
 			fmt.Printf("文件转换失败: %v\n", err)
 			os.Exit(1)

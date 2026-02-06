@@ -84,7 +84,7 @@ func TestConvertFile(t *testing.T) {
 		}
 
 		// 5、执行文件转换
-		toData, err := ry.ConvertFile(ctx, fromName, toName, fromData)
+		toData, err := ry.Convert(ctx, contract.File, fromName, toName, fromData)
 		if err != nil {
 			t.Fatalf("ConvertFile 失败: %v", err)
 		}
