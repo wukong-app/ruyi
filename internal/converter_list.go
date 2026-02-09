@@ -9,5 +9,6 @@ import (
 func ProvideConverters() []contract.Converter {
 	return []contract.Converter{
 		converter.NewPNGToJPEGConverter(),
+		converter.NewJPEGToPNGConverter(),
 	}
 }

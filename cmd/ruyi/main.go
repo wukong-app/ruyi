@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/wukong-app/ruyi"
@@ -13,6 +14,8 @@ import (
 )
 
 // main 是命令行工具的入口函数
+// go run cmd/ruyi/main.go -kind file -from png -to jpeg -in test/testdata/shop.png -out test/testdata/output/shop.jpeg
+// go run cmd/ruyi/main.go -kind file -from jpeg -to png -in test/testdata/shop.jpg -out test/testdata/output/shop.png
 func main() {
 	kindFlag := flag.String("kind", "", "转换类型 (file)")
 	fromFlag := flag.String("from", "", "源 Concept 格式 (例如 png, usd, yyyy-mm-dd)")
@@ -65,27 +68,27 @@ func main() {
 		}
 		os.Exit(1)
 	}
-	
-	//// 获取 Converter 参数
-	//converterParams := converter.Params()
-	//var sb strings.Builder
-	//sb.WriteString("可用参数:\n")
-	//for _, p := range converterParams {
-	//	required := "否"
-	//	if p.Required {
-	//		required = "是"
-	//	}
-	//	checkDesc := ""
-	//	if p.Check != nil {
-	//		checkDesc = "（有校验函数）"
-	//	}
-	//
-	//	sb.WriteString(fmt.Sprintf(
-	//		"  - %s: %s  默认值: %q  必填: %s %s\n",
-	//		p.Name, p.Desc, p.Default, required, checkDesc,
-	//	))
-	//}
-	//fmt.Println(sb.String())
+
+	// 获取 Converter 参数
+	converterParams := converter.Params()
+	var sb strings.Builder
+	sb.WriteString("可用参数:\n")
+	for _, p := range converterParams {
+		required := "否"
+		if p.Required {
+			required = "是"
+		}
+		checkDesc := ""
+		if p.Check != nil {
+			checkDesc = "（有校验函数）"
+		}
+
+		sb.WriteString(fmt.Sprintf(
+			"  - %s: %s  默认值: %q  必填: %s %s\n",
+			p.Name, p.Desc, p.Default, required, checkDesc,
+		))
+	}
+	fmt.Println(sb.String())
 
 	var outData []byte
 
@@ -101,6 +104,13 @@ func main() {
 		outData, err = converter.Convert(ctx, fromData, params)
 		if err != nil {
 			fmt.Printf("文件转换失败: %v\n", err)
+			os.Exit(1)
+		}
+
+		dir := filepath.Dir(*outFlag)
+		err = os.MkdirAll(dir, 0755)
+		if err != nil {
+			fmt.Printf("创建输出目录(%s)失败: %v\n", dir, err)
 			os.Exit(1)
 		}
 

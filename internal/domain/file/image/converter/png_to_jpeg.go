@@ -3,7 +3,6 @@ package converter
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -11,6 +10,7 @@ import (
 	"image/png"
 	"strconv"
 
+	"github.com/disintegration/imaging"
 	"github.com/wukong-app/ruyi/internal/core"
 	"github.com/wukong-app/ruyi/pkg/contract"
 	"github.com/wukong-app/ruyi/pkg/exception"
@@ -77,9 +77,13 @@ func (s *pngToJpegConverter) Convert(ctx context.Context, in []byte, params map[
 
 	var (
 		quality int
+		width   int64
+		height  int64
 	)
 
 	quality, _ = strconv.Atoi(params[core.ParamQuality])
+	width, _ = strconv.ParseInt(params[core.ParamWidth], 10, strconv.IntSize)
+	height, _ = strconv.ParseInt(params[core.ParamHeight], 10, strconv.IntSize)
 
 	// 1、将输入 []byte 转成 io.Reader
 	imgReader := bytes.NewReader(in)
@@ -87,7 +91,7 @@ func (s *pngToJpegConverter) Convert(ctx context.Context, in []byte, params map[
 	// 2、解码 PNG
 	img, err := png.Decode(imgReader)
 	if err != nil {
-		return nil, fmt.Errorf("png decode failed: %w", err)
+		return nil, exception.Wrapf(exception.Join(exception.ErrConvertFailed, err), "png decode failed")
 	}
 
 	// 3、创建新的 RGBA 画布，处理透明背景（PNG 支持透明，JPG 不支持）
@@ -99,13 +103,20 @@ func (s *pngToJpegConverter) Convert(ctx context.Context, in []byte, params map[
 	// 将 PNG 图像覆盖上去（保留非透明部分）
 	draw.Draw(newImg, newImg.Bounds(), img, img.Bounds().Min, draw.Over)
 
+	var jpegImg image.Image = newImg
+
+	// 缩放
+	if width > 0 || height > 0 {
+		jpegImg = imaging.Resize(jpegImg, int(width), int(height), imaging.Lanczos)
+	}
+
 	// 4、将结果编码为 JPG
 	var buf bytes.Buffer
 	opt := jpeg.Options{
 		Quality: quality,
 	}
-	if err = jpeg.Encode(&buf, newImg, &opt); err != nil {
-		return nil, fmt.Errorf("jpeg encode failed: %w", err)
+	if err = jpeg.Encode(&buf, jpegImg, &opt); err != nil {
+		return nil, exception.Wrapf(exception.Join(exception.ErrConvertFailed, err), "jpeg encode failed")
 	}
 
 	// 5、返回 JPG []byte
