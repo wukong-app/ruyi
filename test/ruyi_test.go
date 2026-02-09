@@ -32,29 +32,6 @@ func TestRuyiExpandAndShrink(t *testing.T) {
 	fmt.Printf("Ruyi shrunk size is %v \n", ry.GetSize())
 }
 
-func TestCanConvert(t *testing.T) {
-	t.Run("can convert", func(t *testing.T) {
-		ry, err := ruyi.New()
-		if err != nil {
-			t.Fatalf("Failed to create Ruyi: %v", err)
-		}
-
-		result := ry.CanConvert(context.Background(), contract.File, contract.PNG, contract.JPEG)
-		require.True(t, result)
-	})
-
-	t.Run("cannot convert", func(t *testing.T) {
-		ry, err := ruyi.New()
-		if err != nil {
-			t.Fatalf("Failed to create Ruyi: %v", err)
-		}
-
-		result := ry.CanConvert(context.Background(), contract.File, "abc", "123")
-		require.False(t, result)
-	})
-
-}
-
 func TestConvertFile(t *testing.T) {
 	t.Run("PNG 转 JPEG，透明背景转白色", func(t *testing.T) {
 		// 1、确保输出目录存在
@@ -75,16 +52,16 @@ func TestConvertFile(t *testing.T) {
 		}
 
 		ctx := context.Background()
-		fromName := contract.PNG
-		toName := contract.JPEG
+		fromName := contract.Png
+		toName := contract.Jpeg
 
-		// 4、检查是否支持转换
-		if !ry.CanConvert(ctx, contract.File, fromName, toName) {
-			t.Fatalf("不支持 PNG -> JPEG 转换")
-		}
+		// 获取转换器
+		converter, err := ry.GetConverter(ctx, contract.File, fromName, toName)
+		require.NoError(t, err)
+		require.NotNil(t, converter)
 
 		// 5、执行文件转换
-		toData, err := ry.Convert(ctx, contract.File, fromName, toName, fromData)
+		toData, err := converter.Convert(ctx, fromData, nil)
 		if err != nil {
 			t.Fatalf("ConvertFile 失败: %v", err)
 		}
