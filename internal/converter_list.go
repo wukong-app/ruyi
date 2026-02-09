@@ -8,11 +8,28 @@ import (
 // ProvideConverters 生成所有转换器列表，供 ConverterRegistry 初始化使用
 func ProvideConverters() []contract.Converter {
 	return []contract.Converter{
-		converter.NewPNGToJPEGConverter(),
+		converter.NewBMPToPNGConverter(),
+		converter.NewBMPToJPEGConverter(),
+		converter.NewGIFToPNGConverter(),
+		converter.NewGIFToJPEGConverter(),
+		converter.NewHEICToPNGConverter(),
+		converter.NewHEICToJPEGConverter(),
+		converter.NewICOToPNGConverter(),
+		converter.NewICOToJPEGConverter(),
+		converter.NewPNGToGIFConverter(),
+		converter.NewPNGToTIFFConverter(),
+		//converter.NewPNGToWEBPConverter(),
+		converter.NewPNGToICOConverter(),
+		//converter.NewPNGToHEICConverter(),
 		converter.NewJPEGToPNGConverter(),
+		converter.NewJPEGToSVGConverter(),
+		converter.NewPNGToJPEGConverter(),
+		converter.NewPNGToSVGConverter(),
 		converter.NewSVGToPNGConverter(),
 		converter.NewSVGToJPEGConverter(),
-		converter.NewPNGToSVGConverter(),
-		converter.NewJPEGToSVGConverter(),
+		converter.NewTIFFToPNGConverter(),
+		converter.NewTIFFToJPEGConverter(),
+		converter.NewWEBPToPNGConverter(),
+		converter.NewWEBPToJPEGConverter(),
 	}
 }

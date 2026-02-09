@@ -13,4 +13,13 @@ const (
 	Jpg  ConceptName = "jpg"
 	Jpe  ConceptName = "jpe"
 	Svg  ConceptName = "svg"
+	Gif  ConceptName = "gif"
+	Bmp  ConceptName = "bmp"
+	Dib  ConceptName = "dib"
+	Tiff ConceptName = "tiff"
+	Tif  ConceptName = "tif"
+	Webp ConceptName = "webp"
+	Heic ConceptName = "heic"
+	Heif ConceptName = "heif"
+	Ico  ConceptName = "ico"
 )

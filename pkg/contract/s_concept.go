@@ -5,6 +5,12 @@ var (
 	png  = newConcept(Png, File)
 	jpeg = newConcept(Jpeg, File, Jpg, Jpe)
 	svg  = newConcept(Svg, File)
+	gif  = newConcept(Gif, File)
+	bmp  = newConcept(Bmp, File, Dib)
+	tiff = newConcept(Tiff, File, Tif)
+	webp = newConcept(Webp, File)
+	heic = newConcept(Heic, File, Heif)
+	ico  = newConcept(Ico, File)
 )
 
 // Concept 概念
@@ -57,4 +63,28 @@ func JPEG() Concept {
 
 func SVG() Concept {
 	return svg
+}
+
+func GIF() Concept {
+	return gif
+}
+
+func BMP() Concept {
+	return bmp
+}
+
+func TIFF() Concept {
+	return tiff
+}
+
+func WEBP() Concept {
+	return webp
+}
+
+func HEIC() Concept {
+	return heic
+}
+
+func ICO() Concept {
+	return ico
 }

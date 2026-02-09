@@ -20,6 +20,7 @@ import (
 // go run cmd/ruyi/main.go -kind file -from svg -to jpeg -in test/testdata/shop.svg -out test/testdata/output/shop.jpeg --param width=1024
 // go run cmd/ruyi/main.go -kind file -from jpeg -to svg -in test/testdata/shop.jpg -out test/testdata/output/shop.svg --param width=1024
 // go run cmd/ruyi/main.go -kind file -from png -to svg -in test/testdata/shop.png -out test/testdata/output/shop.svg --param width=1024
+// go run cmd/ruyi/main.go -kind file -from png -to gif -in test/testdata/shop.png -out test/testdata/output/shop.gif
 func main() {
 	kindFlag := flag.String("kind", "", "转换类型 (file)")
 	fromFlag := flag.String("from", "", "源 Concept 格式 (例如 png, usd, yyyy-mm-dd)")
