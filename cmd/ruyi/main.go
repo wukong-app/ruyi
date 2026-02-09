@@ -9,11 +9,12 @@ import (
 
 	"github.com/wukong-app/ruyi"
 	"github.com/wukong-app/ruyi/pkg/contract"
+	"github.com/wukong-app/ruyi/pkg/exception"
 )
 
 // main 是命令行工具的入口函数
 func main() {
-	kindFlag := flag.String("kind", "file", "转换类型 (file/currency/time/number)")
+	kindFlag := flag.String("kind", "", "转换类型 (file)")
 	fromFlag := flag.String("from", "", "源 Concept 格式 (例如 png, usd, yyyy-mm-dd)")
 	toFlag := flag.String("to", "", "目标 Concept 格式 (例如 jpeg, cny, timestamp)")
 	inFlag := flag.String("in", "", "输入内容: 文件路径 或 原始数据")
@@ -48,8 +49,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	if !r.CanConvert(ctx, kind, fromName, toName) {
-		fmt.Printf("不支持 %s 类型的转换: %s -> %s\n", kind, fromName, toName)
+	// 获取 Converter
+	converter, err := r.GetConverter(ctx, kind, fromName, toName)
+	if err != nil {
+		if exception.Is(err, exception.ErrNoSupportedConverter) {
+			fmt.Printf("不支持 %s 类型的转换: %s -> %s\n", kind, fromName, toName)
+		} else {
+			fmt.Printf("获取 Converter 失败: %v\n", err)
+		}
 		os.Exit(1)
 	}
 
@@ -64,7 +71,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		outData, err = r.Convert(ctx, contract.File, fromName, toName, fromData)
+		outData, err = converter.Convert(ctx, fromData)
 		if err != nil {
 			fmt.Printf("文件转换失败: %v\n", err)
 			os.Exit(1)

@@ -1,6 +1,8 @@
 package contract
 
-import "context"
+import (
+	"context"
+)
 
 // Ruyi 是瑞意（Ruyi）框架的顶层接口。
 //
@@ -19,46 +21,18 @@ type Ruyi interface {
 	// 核心功能
 	// -------------------------------
 
-	// CanConvert 判断是否支持指定类型的转换能力
-	//
+	// GetConverter 获取 Converter
 	// 参数:
 	//   - ctx: 上下文，用于控制超时、取消等
 	//   - kind: 转换类型（Kind），例如文件、货币、时间、数字等
-	//   - from: 源 Concept 名称
-	//   - to: 目标 Concept 名称
+	//   - from: 源 ConceptName
+	//   - to: 目标 ConceptName
 	//
 	// 返回值:
-	//   - bool: 如果存在对应的 Converter 返回 true，否则返回 false
-	//
-	// 说明:
-	//   可在调用 Convert 之前进行能力探测（Capability Check），
-	//   避免调用不支持的转换。函数内部通过注册器查找对应的 Converter。
-	CanConvert(ctx context.Context, kind Kind, from ConceptName, to ConceptName) bool
-
-	// Convert 通用转换函数（核心功能）
-	//
-	// 参数:
-	//   - ctx: 上下文，用于控制超时、取消等
-	//   - kind: 转换类型（Kind），例如文件、货币、时间、数字等
-	//   - fromName: 源 Concept 名称
-	//   - toName: 目标 Concept 名称
-	//   - fromData: 待转换的数据，统一使用 []byte 传递
-	//
-	// 返回值:
-	//   - toData []byte: 转换后的结果
-	//   - err error: 转换失败时返回错误，包括以下情况:
-	//       1、exception.ErrNoSupportedConverter 找不到对应 Converter
-	//       2、exception.ErrConvertFailed Converter 执行出错
-	//       3、exception.ErrInvalidConverterOutput Converter 返回值类型不符合预期
-	//
-	// 说明:
-	//   1、通过注册器查找指定 kind、from -> to 的 Converter，如果未找到则返回 ErrNoSupportedConverter。
-	//   2、调用 Converter 执行转换，将 fromData 转换为目标类型。
-	//   3、返回 Converter 输出，由外层或封装方法（如 ConvertFile、ConvertCurrency 等）做类型断言与安全检查。
-	//   4、调用方应根据 kind 对输出进行相应解析，例如：
-	//        - 文件类型直接写入文件
-	//        - 文本/数字/货币/时间类型转成字符串解析
-	Convert(ctx context.Context, kind Kind, fromName ConceptName, toName ConceptName, fromData []byte) (toData []byte, err error)
+	//   - Converter: 转换器
+	//   - error: 获取失败时返回错误，包括以下情况:
+	//     		1. exception.ErrNoSupportedConverter 找不到转换器
+	GetConverter(ctx context.Context, kind Kind, from ConceptName, to ConceptName) (Converter, error)
 
 	// -------------------------------
 	// 彩蛋功能（趣味展示，不影响核心逻辑）

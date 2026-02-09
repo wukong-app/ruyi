@@ -10,24 +10,24 @@ import (
 	"image/jpeg"
 	"image/png"
 
-	"github.com/wukong-app/ruyi/internal/core"
+	"github.com/wukong-app/ruyi/pkg/contract"
 )
 
-var _ core.Converter = (*pngToJpegConverter)(nil)
+var _ contract.Converter = (*pngToJpegConverter)(nil)
 
 // pngToJpegConverter PNG -> JPEG 文件转换器
 type pngToJpegConverter struct{}
 
-func NewPNGToJPEGConverter() core.Converter {
+func NewPNGToJPEGConverter() contract.Converter {
 	return &pngToJpegConverter{}
 }
 
-func (c *pngToJpegConverter) From() core.Concept {
-	return core.PNG()
+func (c *pngToJpegConverter) From() contract.Concept {
+	return contract.PNG()
 }
 
-func (c *pngToJpegConverter) To() core.Concept {
-	return core.JPEG()
+func (c *pngToJpegConverter) To() contract.Concept {
+	return contract.JPEG()
 }
 
 func (c *pngToJpegConverter) Convert(ctx context.Context, in []byte) ([]byte, error) {

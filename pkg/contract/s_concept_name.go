@@ -8,8 +8,8 @@ type ConceptName string
 //////////////////////////////
 
 const (
-	PNG  ConceptName = "png"
-	JPEG ConceptName = "jpeg"
-	JPG  ConceptName = "jpg"
-	JPE  ConceptName = "jpe"
+	Png  ConceptName = "png"
+	Jpeg ConceptName = "jpeg"
+	Jpg  ConceptName = "jpg"
+	Jpe  ConceptName = "jpe"
 )

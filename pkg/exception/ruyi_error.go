@@ -8,8 +8,7 @@ var (
 )
 
 var (
-	ErrInternal               = Errorf("internal error")
-	ErrNoSupportedConverter   = Errorf("no supported converter")
-	ErrConvertFailed          = Errorf("convert failed")
-	ErrInvalidConverterOutput = Errorf("converter returned invalid output type")
+	ErrInternal             = Errorf("internal error")
+	ErrNoSupportedConverter = Errorf("no supported converter")
+	ErrConvertFailed        = Errorf("convert failed")
 )

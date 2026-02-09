@@ -11,7 +11,7 @@ import (
 
 var _ core.ConverterRegistry = (*converterRegistry)(nil)
 
-func NewConverterRegistry(converters []core.Converter) (core.ConverterRegistry, error) {
+func NewConverterRegistry(converters []contract.Converter) (core.ConverterRegistry, error) {
 	r := &converterRegistry{}
 	err := r.Register(converters...)
 	if err != nil {
@@ -23,31 +23,31 @@ func NewConverterRegistry(converters []core.Converter) (core.ConverterRegistry, 
 // converterRegistry 转换器注册器默认实现
 type converterRegistry struct {
 	// all 所有转换器
-	all []core.Converter
+	all []contract.Converter
 
 	// byKind kind -> converter list
-	byKind map[contract.Kind][]core.Converter
+	byKind map[contract.Kind][]contract.Converter
 
 	// matrix kind -> from(Concept name) -> to(Concept name) -> converter
-	matrix map[contract.Kind]map[contract.ConceptName]map[contract.ConceptName]core.Converter
+	matrix map[contract.Kind]map[contract.ConceptName]map[contract.ConceptName]contract.Converter
 
 	// byFrom kind -> from(Concept name) -> converter list
-	byFrom map[contract.Kind]map[contract.ConceptName][]core.Converter
+	byFrom map[contract.Kind]map[contract.ConceptName][]contract.Converter
 
 	// byTo kind -> to(Concept name) -> converter list
-	byTo map[contract.Kind]map[contract.ConceptName][]core.Converter
+	byTo map[contract.Kind]map[contract.ConceptName][]contract.Converter
 }
 
 // Register 注册转换器
 // @param converters 转换器列表
-func (s *converterRegistry) Register(converters ...core.Converter) error {
+func (s *converterRegistry) Register(converters ...contract.Converter) error {
 	if len(converters) == 0 {
 		return nil
 	}
 
 	var (
 		distinct       = make(map[string]struct{})
-		genDistinctKey = func(converter core.Converter) string {
+		genDistinctKey = func(converter contract.Converter) string {
 			return fmt.Sprintf("%s_%s", converter.From().Name(), converter.To().Name())
 		}
 	)
@@ -69,13 +69,13 @@ func (s *converterRegistry) Register(converters ...core.Converter) error {
 }
 
 // Find 查找转换器
-func (s *converterRegistry) Find(ctx context.Context, kind contract.Kind, from contract.ConceptName, to contract.ConceptName) core.Converter {
+func (s *converterRegistry) Find(ctx context.Context, kind contract.Kind, from contract.ConceptName, to contract.ConceptName) contract.Converter {
 	// 标准化 name
-	fromConcept, ok := core.NormalizeConcept(from)
+	fromConcept, ok := contract.NormalizeConcept(from)
 	if !ok {
 		return nil
 	}
-	toConcept, ok := core.NormalizeConcept(to)
+	toConcept, ok := contract.NormalizeConcept(to)
 	if !ok {
 		return nil
 	}
@@ -85,7 +85,7 @@ func (s *converterRegistry) Find(ctx context.Context, kind contract.Kind, from c
 // add 添加转换器
 // @receiver s
 // @param converter
-func (s *converterRegistry) add(converter core.Converter) {
+func (s *converterRegistry) add(converter contract.Converter) {
 	var (
 		from     = converter.From()
 		fromName = from.Name()
@@ -99,37 +99,37 @@ func (s *converterRegistry) add(converter core.Converter) {
 
 	// save to byKind
 	if s.byKind == nil {
-		s.byKind = make(map[contract.Kind][]core.Converter)
+		s.byKind = make(map[contract.Kind][]contract.Converter)
 	}
 	s.byKind[kind] = append(s.byKind[kind], converter)
 
 	// save to matrix
 	if s.matrix == nil {
-		s.matrix = make(map[contract.Kind]map[contract.ConceptName]map[contract.ConceptName]core.Converter)
+		s.matrix = make(map[contract.Kind]map[contract.ConceptName]map[contract.ConceptName]contract.Converter)
 	}
 	if s.matrix[kind] == nil {
-		s.matrix[kind] = make(map[contract.ConceptName]map[contract.ConceptName]core.Converter)
+		s.matrix[kind] = make(map[contract.ConceptName]map[contract.ConceptName]contract.Converter)
 	}
 	if s.matrix[kind][fromName] == nil {
-		s.matrix[kind][fromName] = make(map[contract.ConceptName]core.Converter)
+		s.matrix[kind][fromName] = make(map[contract.ConceptName]contract.Converter)
 	}
 	s.matrix[kind][fromName][toName] = converter
 
 	// save to byFrom
 	if s.byFrom == nil {
-		s.byFrom = make(map[contract.Kind]map[contract.ConceptName][]core.Converter)
+		s.byFrom = make(map[contract.Kind]map[contract.ConceptName][]contract.Converter)
 	}
 	if s.byFrom[kind] == nil {
-		s.byFrom[kind] = make(map[contract.ConceptName][]core.Converter)
+		s.byFrom[kind] = make(map[contract.ConceptName][]contract.Converter)
 	}
 	s.byFrom[kind][fromName] = append(s.byFrom[kind][fromName], converter)
 
 	// save to byTo
 	if s.byTo == nil {
-		s.byTo = make(map[contract.Kind]map[contract.ConceptName][]core.Converter)
+		s.byTo = make(map[contract.Kind]map[contract.ConceptName][]contract.Converter)
 	}
 	if s.byTo[kind] == nil {
-		s.byTo[kind] = make(map[contract.ConceptName][]core.Converter)
+		s.byTo[kind] = make(map[contract.ConceptName][]contract.Converter)
 	}
 	s.byTo[kind][toName] = append(s.byTo[kind][toName], converter)
 }
