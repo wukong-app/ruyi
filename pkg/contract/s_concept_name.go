@@ -12,4 +12,5 @@ const (
 	Jpeg ConceptName = "jpeg"
 	Jpg  ConceptName = "jpg"
 	Jpe  ConceptName = "jpe"
+	Svg  ConceptName = "svg"
 )

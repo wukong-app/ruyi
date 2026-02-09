@@ -4,6 +4,7 @@ package contract
 var (
 	png  = newConcept(Png, File)
 	jpeg = newConcept(Jpeg, File, Jpg, Jpe)
+	svg  = newConcept(Svg, File)
 )
 
 // Concept 概念
@@ -52,4 +53,8 @@ func PNG() Concept {
 
 func JPEG() Concept {
 	return jpeg
+}
+
+func SVG() Concept {
+	return svg
 }

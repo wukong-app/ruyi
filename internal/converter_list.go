@@ -10,5 +10,9 @@ func ProvideConverters() []contract.Converter {
 	return []contract.Converter{
 		converter.NewPNGToJPEGConverter(),
 		converter.NewJPEGToPNGConverter(),
+		converter.NewSVGToPNGConverter(),
+		converter.NewSVGToJPEGConverter(),
+		converter.NewPNGToSVGConverter(),
+		converter.NewJPEGToSVGConverter(),
 	}
 }
