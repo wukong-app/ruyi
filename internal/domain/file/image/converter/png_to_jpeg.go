@@ -9,28 +9,78 @@ import (
 	"image/draw"
 	"image/jpeg"
 	"image/png"
+	"strconv"
 
+	"github.com/wukong-app/ruyi/internal/core"
 	"github.com/wukong-app/ruyi/pkg/contract"
+	"github.com/wukong-app/ruyi/pkg/exception"
 )
 
 var _ contract.Converter = (*pngToJpegConverter)(nil)
 
 // pngToJpegConverter PNG -> JPEG 文件转换器
-type pngToJpegConverter struct{}
-
-func NewPNGToJPEGConverter() contract.Converter {
-	return &pngToJpegConverter{}
+type pngToJpegConverter struct {
+	params contract.ConverterParams
 }
 
-func (c *pngToJpegConverter) From() contract.Concept {
+func NewPNGToJPEGConverter() contract.Converter {
+	params := contract.ConverterParams{}
+	params.Append(
+		contract.ConverterParam{
+			Name:     core.ParamQuality,
+			Desc:     "将结果编码为 JPG 时的图片质量，范围从 1 到 100（含），越高越好。",
+			Default:  "100",
+			Required: false,
+			Check: func(value string) error {
+				if value == "" {
+					return exception.Errorf("param is required")
+				}
+				v, err := strconv.ParseInt(value, 10, 64)
+				if err != nil {
+					return exception.Wrapf(err, "param value must be a positive integer")
+				}
+				if v < 1 || v > 100 {
+					return exception.Errorf("param value must be in range [1, 100]")
+				}
+				return nil
+			},
+		},
+	)
+
+	return &pngToJpegConverter{
+		params: params,
+	}
+}
+
+func (s *pngToJpegConverter) From() contract.Concept {
 	return contract.PNG()
 }
 
-func (c *pngToJpegConverter) To() contract.Concept {
+func (s *pngToJpegConverter) To() contract.Concept {
 	return contract.JPEG()
 }
 
-func (c *pngToJpegConverter) Convert(ctx context.Context, in []byte) ([]byte, error) {
+func (s *pngToJpegConverter) Params() []contract.ConverterParam {
+	params := make([]contract.ConverterParam, 0, len(s.params))
+	for _, param := range s.params {
+		params = append(params, param.Clone())
+	}
+	return params
+}
+
+func (s *pngToJpegConverter) Convert(ctx context.Context, in []byte, params map[string]string) ([]byte, error) {
+	// 获取参数
+	params, err := s.params.CheckAndGetParams(params)
+	if err != nil {
+		return nil, err
+	}
+
+	var (
+		quality int
+	)
+
+	quality, _ = strconv.Atoi(params[core.ParamQuality])
+
 	// 1、将输入 []byte 转成 io.Reader
 	imgReader := bytes.NewReader(in)
 
@@ -52,7 +102,7 @@ func (c *pngToJpegConverter) Convert(ctx context.Context, in []byte) ([]byte, er
 	// 4、将结果编码为 JPG
 	var buf bytes.Buffer
 	opt := jpeg.Options{
-		Quality: 100,
+		Quality: quality,
 	}
 	if err = jpeg.Encode(&buf, newImg, &opt); err != nil {
 		return nil, fmt.Errorf("jpeg encode failed: %w", err)

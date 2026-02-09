@@ -8,7 +8,8 @@ var (
 )
 
 var (
-	ErrInternal             = Errorf("internal error")
-	ErrNoSupportedConverter = Errorf("no supported converter")
-	ErrConvertFailed        = Errorf("convert failed")
+	ErrInternal              = Errorf("internal error")
+	ErrNoSupportedConverter  = Errorf("no supported converter")
+	ErrConvertFailed         = Errorf("convert failed")
+	ErrIllegalConverterParam = Errorf("illegal converter param") // 非法的转换器参数
 )

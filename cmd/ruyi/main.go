@@ -20,6 +20,12 @@ func main() {
 	inFlag := flag.String("in", "", "输入内容: 文件路径 或 原始数据")
 	outFlag := flag.String("out", "", "输出内容: 文件路径 或 原始数据输出路径")
 
+	var params ParamMap
+	flag.Var(
+		&params,
+		"param",
+		"转换器参数（key=value 或 key=value;key=value）可多次指定，或使用分号分隔",
+	)
 	flag.Parse()
 
 	if *fromFlag == "" || *toFlag == "" || *inFlag == "" || *outFlag == "" {
@@ -59,6 +65,27 @@ func main() {
 		}
 		os.Exit(1)
 	}
+	
+	//// 获取 Converter 参数
+	//converterParams := converter.Params()
+	//var sb strings.Builder
+	//sb.WriteString("可用参数:\n")
+	//for _, p := range converterParams {
+	//	required := "否"
+	//	if p.Required {
+	//		required = "是"
+	//	}
+	//	checkDesc := ""
+	//	if p.Check != nil {
+	//		checkDesc = "（有校验函数）"
+	//	}
+	//
+	//	sb.WriteString(fmt.Sprintf(
+	//		"  - %s: %s  默认值: %q  必填: %s %s\n",
+	//		p.Name, p.Desc, p.Default, required, checkDesc,
+	//	))
+	//}
+	//fmt.Println(sb.String())
 
 	var outData []byte
 
@@ -71,7 +98,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		outData, err = converter.Convert(ctx, fromData)
+		outData, err = converter.Convert(ctx, fromData, params)
 		if err != nil {
 			fmt.Printf("文件转换失败: %v\n", err)
 			os.Exit(1)
@@ -88,4 +115,50 @@ func main() {
 	}
 
 	fmt.Printf("转换成功: kind=%s, %s -> %s, 输出: %s\n", kind, fromName, toName, *outFlag)
+}
+
+type ParamMap map[string]string
+
+func (p *ParamMap) String() string {
+	if p == nil || len(*p) == 0 {
+		return ""
+	}
+
+	var parts []string
+	for k, v := range *p {
+		parts = append(parts, fmt.Sprintf("%s=%s", k, v))
+	}
+	return strings.Join(parts, ", ")
+}
+
+func (p *ParamMap) Set(value string) error {
+	if *p == nil {
+		*p = make(map[string]string)
+	}
+
+	// 支持：a=b;c=d
+	items := strings.Split(value, ";")
+
+	for _, item := range items {
+		item = strings.TrimSpace(item)
+		if item == "" {
+			continue
+		}
+
+		kv := strings.SplitN(item, "=", 2)
+		if len(kv) != 2 {
+			return fmt.Errorf("参数格式错误，必须是 key=value，得到: %s", item)
+		}
+
+		key := strings.TrimSpace(kv[0])
+		val := strings.TrimSpace(kv[1])
+
+		if key == "" {
+			return fmt.Errorf("参数 key 不能为空")
+		}
+
+		(*p)[key] = val
+	}
+
+	return nil
 }
