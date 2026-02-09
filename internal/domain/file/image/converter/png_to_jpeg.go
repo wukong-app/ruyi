@@ -8,6 +8,7 @@ import (
 	"image/draw"
 	"image/jpeg"
 	"image/png"
+	"math"
 	"strconv"
 
 	"github.com/disintegration/imaging"
@@ -26,6 +27,44 @@ type pngToJpegConverter struct {
 func NewPNGToJPEGConverter() contract.Converter {
 	params := contract.ConverterParams{}
 	params.Append(
+		contract.ConverterParam{
+			Name:     core.ParamWidth,
+			Desc:     "转换后的图片宽度，单位：像素。值为正整数，默认值为 0，表示不缩放。",
+			Default:  "0",
+			Required: false,
+			Check: func(value string) error {
+				if value == "" {
+					return nil
+				}
+				v, err := strconv.ParseUint(value, 10, 64)
+				if err != nil {
+					return exception.Wrapf(err, "param value must be a positive integer")
+				}
+				if v >= math.MaxInt {
+					return exception.Errorf("param value must be less than %d", math.MaxInt)
+				}
+				return nil
+			},
+		},
+		contract.ConverterParam{
+			Name:     core.ParamHeight,
+			Desc:     "转换后的图片高度，单位：像素。值为正整数，默认值为 0，表示不缩放。",
+			Default:  "0",
+			Required: false,
+			Check: func(value string) error {
+				if value == "" {
+					return nil
+				}
+				v, err := strconv.ParseUint(value, 10, 32)
+				if err != nil {
+					return exception.Wrapf(err, "param value must be a positive integer")
+				}
+				if v >= math.MaxInt {
+					return exception.Errorf("param value must be less than %d", math.MaxInt)
+				}
+				return nil
+			},
+		},
 		contract.ConverterParam{
 			Name:     core.ParamQuality,
 			Desc:     "将结果编码为 JPG 时的图片质量，范围从 1 到 100（含），越高越好。",
