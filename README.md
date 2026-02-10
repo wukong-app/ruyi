@@ -77,16 +77,70 @@ func main() {
 
 ## 🔌 支持的转换
 
-目前 Ruyi 主要支持以下图片格式的转换：
+目前 Ruyi 主要支持以下图片格式的转换。我们通过 **源格式 (Source)** 与 **目标格式 (Target)** 的矩阵来展示支持情况及可用参数。
 
-| 源格式  | 目标格式 | 支持参数说明                                                                               |
-| :----- | :------ |:-------------------------------------------------------------------------------------|
-| **JPEG** | **PNG**  | - `width`, `height`：支持调整输出图片尺寸（像素），0 表示不缩放。                                          |
-| **PNG**  | **JPEG** | - `width`, `height`：支持调整输出图片尺寸（像素），0 表示不缩放。<br>- `quality`：JPEG 压缩质量 (1-100)，默认 100。 |
-| **SVG**  | **PNG**  | - `width`, `height`：支持调整输出图片尺寸（像素），0 表示使用 SVG 定义的尺寸。                               |
-| **SVG**  | **JPEG** | - `width`, `height`：支持调整输出图片尺寸（像素），0 表示使用 SVG 定义的尺寸。<br>- `quality`：JPEG 压缩质量 (1-100)，默认 100。 |
-| **PNG**  | **SVG**  | - `width`, `height`：指定 SVG 的显示尺寸（像素），0 表示使用原图尺寸。<br>*(注：采用嵌入式转换，将 PNG 嵌入 SVG)*          |
-| **JPEG** | **SVG**  | - `width`, `height`：指定 SVG 的显示尺寸（像素），0 表示使用原图尺寸。<br>*(注：采用嵌入式转换，将 JPEG 嵌入 SVG)*         |
+### ✅ 支持矩阵
+
+| 源 \ 目标 | PNG | JPEG | GIF | BMP | TIFF | ICO | WEBP | HEIC | SVG |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |:----:|:---:|
+| **PNG** | - | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️|  ⚠️  |  ✅  |
+| **JPEG** | ✅ | - | ✅ | ✅ | ✅ | ✅ | ⚠️|  ⚠️  |  ✅  |
+| **GIF** | ✅ | ✅ | - | - | - | - | - |  -   |  -  |
+| **BMP** | ✅ | ✅ | - | - | - | - | - |  -   |  -  |
+| **TIFF** | ✅ | ✅ | - | - | - | - | - |  -   |  -  |
+| **ICO** | ✅ | ✅ | - | - | - | - | - |  -   |  -  |
+| **WEBP** | ✅ | ✅ | - | - | - | - | - |  -   |  -  |
+| **HEIC** | ✅ | ✅ | - | - | - | - | - |  -   |  -  |
+| **SVG** | ✅ | ✅ | - | - | - | - | - |  -   |  -  |
+
+> **注:**
+> *   ✅: 完全支持
+> *   ⚠️: 暂不支持
+
+### 🎛️ 通用参数说明
+
+大多数转换器都支持以下通用参数来控制输出结果：
+
+| 参数名 | 说明 | 适用范围 | 默认值 |
+| :--- | :--- | :--- | :--- |
+| **`width`** | 输出图片的宽度（像素）。`0` 表示保持原比例或不缩放。 | 所有图片转换 | `0` |
+| **`height`** | 输出图片的高度（像素）。`0` 表示保持原比例或不缩放。 | 所有图片转换 | `0` |
+| **`quality`** | 图片压缩质量 (1-100)，值越高画质越好，文件越大。 | JPEG, WEBP | `100` |
+
+*提示：使用 CLI 工具时，可以通过 `go run cmd/ruyi/main.go -kind file -from <src> -to <tgt> --help` 查看特定转换器的详细参数。*
+
+## 💻 命令行工具 (CLI)
+
+Ruyi 提供了一个方便的命令行工具，无需编写代码即可直接执行转换。
+
+### 使用方法
+
+```bash
+# 1. 运行 CLI 工具 (推荐)
+go run cmd/ruyi/main.go -kind file -from <src_format> -to <tgt_format> -in <input_path> -out <output_path> [params...]
+
+# 2. 查询特定转换器的支持参数
+go run cmd/ruyi/main.go -kind file -from <src_format> -to <tgt_format> --help
+```
+
+### 示例
+
+**1. 将 PNG 转换为 JPEG 并调整尺寸**
+
+```bash
+go run cmd/ruyi/main.go -kind file -from png -to jpeg \
+    -in test/testdata/shop.png \
+    -out output/shop.jpg \
+    --param "width=800;quality=90"
+```
+
+**2. 查询 SVG 转 PNG 的可用参数**
+
+```bash
+go run cmd/ruyi/main.go -kind file -from svg -to png --help
+```
+
+---
 
 ## 🏗 架构概览
 
@@ -100,6 +154,16 @@ Ruyi 的核心由以下几个部分组成：
 ## 🤝 贡献指南
 
 欢迎提交 Issue 或 Pull Request 来丰富 Ruyi 的转换能力！请确保新增的 Converter 遵循 `pkg/contract` 中的接口定义，并附带相应的测试用例。
+
+## ❤️ 致谢
+
+Ruyi 的强大能力离不开以下优秀的开源项目：
+
+*   **[imaging](https://github.com/disintegration/imaging)**: 提供核心的图片处理算法（缩放、旋转等）。
+*   **[golang.org/x/image](https://pkg.go.dev/golang.org/x/image)**: 提供 BMP, TIFF, WEBP 等格式的编解码支持。
+*   **[goheif](https://github.com/jdeng/goheif)**: 提供 HEIC 格式的纯 Go 解码支持。
+*   **[oksvg](https://github.com/srwiley/oksvg)**: 提供 SVG 格式的解析和渲染支持。
+*   **[golang-ico](https://github.com/biessek/golang-ico)**: 提供 ICO 格式的编解码支持。
 
 ## 📄 许可证
 
