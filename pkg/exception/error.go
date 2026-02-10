@@ -26,7 +26,39 @@ func Wrapf(err error, message string, msgArgs ...any) error {
 // @param errs 错误对象列表
 // @return error 合并后的错误对象
 func Join(errs ...error) error {
-	return errors.Join(errs...)
+	n := 0
+	for _, err := range errs {
+		if err != nil {
+			n++
+		}
+	}
+	if n == 0 {
+		return nil
+	}
+	e := &joinError{
+		errs: make([]error, 0, n),
+	}
+	for _, err := range errs {
+		if err != nil {
+			e.errs = append(e.errs, err)
+		}
+	}
+	return e
+}
+
+type joinError struct {
+	errs []error
+}
+
+func (e *joinError) Error() string {
+	var b []byte
+	for i, err := range e.errs {
+		if i > 0 {
+			b = append(b, '\n')
+		}
+		b = append(b, err.Error()...)
+	}
+	return string(b)
 }
 
 // Is 判断 err 树中的任意 error 是否与 target 匹配。

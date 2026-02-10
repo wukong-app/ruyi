@@ -12,7 +12,7 @@ import (
 	"github.com/wukong-app/ruyi/pkg/contract"
 )
 
-// Injectors from factory.go:
+// Injectors from wire.go:
 
 // New returns a new Ruyi.
 func New() (contract.Ruyi, error) {
