@@ -6,7 +6,6 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
-	"math"
 	"strconv"
 
 	"github.com/disintegration/imaging"
@@ -26,65 +25,7 @@ type svgToJpegConverter struct {
 
 func NewSVGToJPEGConverter() contract.Converter {
 	params := contract.ConverterParams{}
-	params.Append(
-		contract.ConverterParam{
-			Name:     core.ParamWidth,
-			Desc:     "转换后的图片宽度，单位：像素。值为正整数，默认值为 0，表示使用 SVG 定义的宽度。",
-			Default:  "0",
-			Required: false,
-			Check: func(value string) error {
-				if value == "" {
-					return nil
-				}
-				v, err := strconv.ParseUint(value, 10, 64)
-				if err != nil {
-					return exception.Wrapf(err, "param value must be a positive integer")
-				}
-				if v >= math.MaxInt {
-					return exception.Errorf("param value must be less than %d", math.MaxInt)
-				}
-				return nil
-			},
-		},
-		contract.ConverterParam{
-			Name:     core.ParamHeight,
-			Desc:     "转换后的图片高度，单位：像素。值为正整数，默认值为 0，表示使用 SVG 定义的高度。",
-			Default:  "0",
-			Required: false,
-			Check: func(value string) error {
-				if value == "" {
-					return nil
-				}
-				v, err := strconv.ParseUint(value, 10, 64)
-				if err != nil {
-					return exception.Wrapf(err, "param value must be a positive integer")
-				}
-				if v >= math.MaxInt {
-					return exception.Errorf("param value must be less than %d", math.MaxInt)
-				}
-				return nil
-			},
-		},
-		contract.ConverterParam{
-			Name:     core.ParamQuality,
-			Desc:     "JPG 质量，1-100，默认 100",
-			Default:  "100",
-			Required: false,
-			Check: func(value string) error {
-				if value == "" {
-					return nil
-				}
-				v, err := strconv.Atoi(value)
-				if err != nil {
-					return exception.Wrapf(err, "quality must be integer")
-				}
-				if v < 1 || v > 100 {
-					return exception.Errorf("quality must be in [1, 100]")
-				}
-				return nil
-			},
-		},
-	)
+	params.Append(NewWidthParam(), NewHeightParam(), NewQualityParam())
 
 	return &svgToJpegConverter{
 		params: params,

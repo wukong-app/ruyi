@@ -18,6 +18,21 @@ build: prepare
 	@go build -o $(OUTPUT_DIR)/ruyi/ruyi $(CMD_RUYI)
 	@echo "build done"
 
+test:
+	@echo "do test"
+	@go test -v -cover ./...
+	@echo "test done"
+
+fmt:
+	@echo "do fmt"
+	@go fmt ./...
+	@echo "fmt done"
+
+clean:
+	@echo "do clean"
+	@rm -rf $(OUTPUT_DIR)
+	@echo "clean done"
+
 wire:
 	@echo "do wire"
 	@cd $(INTERNAL_PACKAGE) && go run -mod=mod github.com/google/wire/cmd/wire

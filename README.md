@@ -41,7 +41,7 @@ func main() {
 	}
 
 	// 示例数据（实际使用时应为真实文件字节）
-	inputBytes := []byte("fake-jpeg-data") 
+	inputBytes := []byte("fake-jpeg-data")
 	ctx := context.Background()
 
 	// ... 接下文
@@ -51,28 +51,28 @@ func main() {
 ### 2. 执行转换
 
 ```go
-	// 获取 JPEG 到 PNG 的转换器
-	// contract.File 表示转换类型为文件
-	// contract.JPEG 和 contract.PNG 分别表示源和目标格式
-	converter, err := ry.GetConverter(ctx, contract.File, contract.JPEG, contract.PNG)
-	if err != nil {
-		log.Fatalf("converter not found: %v", err)
-	}
+    // 获取 JPEG 到 PNG 的转换器
+// contract.File 表示转换类型为文件
+// contract.JPEG 和 contract.PNG 分别表示源和目标格式
+converter, err := ry.GetConverter(ctx, contract.File, contract.JPEG, contract.PNG)
+if err != nil {
+log.Fatalf("converter not found: %v", err)
+}
 
-	// 准备参数（可选）
-	params := map[string]string{
-		"width":  "200", // 目标宽度
-		"height": "200", // 目标高度
-	}
+// 准备参数（可选）
+params := map[string]string{
+"width":  "200", // 目标宽度
+"height": "200", // 目标高度
+}
 
-	// 执行转换
-	outputBytes, err := converter.Convert(ctx, inputBytes, params)
-	if err != nil {
-		// 注意：这里的 inputBytes 是伪造的，实际运行会报错，需使用真实图片数据
-		log.Printf("conversion failed (expected for fake data): %v", err)
-	} else {
-		fmt.Printf("Successfully converted %d bytes to %d bytes\n", len(inputBytes), len(outputBytes))
-	}
+// 执行转换
+outputBytes, err := converter.Convert(ctx, inputBytes, params)
+if err != nil {
+// 注意：这里的 inputBytes 是伪造的，实际运行会报错，需使用真实图片数据
+log.Printf("conversion failed (expected for fake data): %v", err)
+} else {
+fmt.Printf("Successfully converted %d bytes to %d bytes\n", len(inputBytes), len(outputBytes))
+}
 ```
 
 ## 🔌 支持的转换
@@ -81,33 +81,34 @@ func main() {
 
 ### ✅ 支持矩阵
 
-| 源 \ 目标 | PNG | JPEG | GIF | BMP | TIFF | ICO | WEBP | HEIC | SVG |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |:----:|:---:|
-| **PNG** | - | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️|  ⚠️  |  ✅  |
-| **JPEG** | ✅ | - | ✅ | ✅ | ✅ | ✅ | ⚠️|  ⚠️  |  ✅  |
-| **GIF** | ✅ | ✅ | - | - | - | - | - |  -   |  -  |
-| **BMP** | ✅ | ✅ | - | - | - | - | - |  -   |  -  |
-| **TIFF** | ✅ | ✅ | - | - | - | - | - |  -   |  -  |
-| **ICO** | ✅ | ✅ | - | - | - | - | - |  -   |  -  |
-| **WEBP** | ✅ | ✅ | - | - | - | - | - |  -   |  -  |
-| **HEIC** | ✅ | ✅ | - | - | - | - | - |  -   |  -  |
-| **SVG** | ✅ | ✅ | - | - | - | - | - |  -   |  -  |
+| 源 \ 目标   | PNG | JPEG | GIF | BMP | TIFF | ICO | WEBP | HEIC | SVG |
+|:---------|:---:|:----:|:---:|:---:|:----:|:---:|:----:|:----:|:---:|
+| **PNG**  |  -  |  ✅   |  ✅  |  ✅  |  ✅   |  ✅  |  ⚠️  |  ⚠️  |  ✅  |
+| **JPEG** |  ✅  |  -   |  ✅  |  ✅  |  ✅   |  ✅  |  ⚠️  |  ⚠️  |  ✅  |
+| **GIF**  |  ✅  |  ✅   |  -  |  -  |  -   |  -  |  -   |  -   |  -  |
+| **BMP**  |  ✅  |  ✅   |  -  |  -  |  -   |  -  |  -   |  -   |  -  |
+| **TIFF** |  ✅  |  ✅   |  -  |  -  |  -   |  -  |  -   |  -   |  -  |
+| **ICO**  |  ✅  |  ✅   |  -  |  -  |  -   |  -  |  -   |  -   |  -  |
+| **WEBP** |  ✅  |  ✅   |  -  |  -  |  -   |  -  |  -   |  -   |  -  |
+| **HEIC** |  ✅  |  ✅   |  -  |  -  |  -   |  -  |  -   |  -   |  -  |
+| **SVG**  |  ✅  |  ✅   |  -  |  -  |  -   |  -  |  -   |  -   |  -  |
 
 > **注:**
-> *   ✅: 完全支持
-> *   ⚠️: 暂不支持
+> * ✅: 完全支持
+> * ⚠️: 暂不支持
 
 ### 🎛️ 通用参数说明
 
 大多数转换器都支持以下通用参数来控制输出结果：
 
-| 参数名 | 说明 | 适用范围 | 默认值 |
-| :--- | :--- | :--- | :--- |
-| **`width`** | 输出图片的宽度（像素）。`0` 表示保持原比例或不缩放。 | 所有图片转换 | `0` |
-| **`height`** | 输出图片的高度（像素）。`0` 表示保持原比例或不缩放。 | 所有图片转换 | `0` |
+| 参数名           | 说明                           | 适用范围       | 默认值   |
+|:--------------|:-----------------------------|:-----------|:------|
+| **`width`**   | 输出图片的宽度（像素）。`0` 表示保持原比例或不缩放。 | 所有图片转换     | `0`   |
+| **`height`**  | 输出图片的高度（像素）。`0` 表示保持原比例或不缩放。 | 所有图片转换     | `0`   |
 | **`quality`** | 图片压缩质量 (1-100)，值越高画质越好，文件越大。 | JPEG, WEBP | `100` |
 
-*提示：使用 CLI 工具时，可以通过 `go run cmd/ruyi/main.go -kind file -from <src> -to <tgt> --help` 查看特定转换器的详细参数。*
+*提示：使用 CLI 工具时，可以通过 `go run cmd/ruyi/main.go -kind file -from <src> -to <tgt> --help`
+查看特定转换器的详细参数。*
 
 ## 💻 命令行工具 (CLI)
 
@@ -159,11 +160,21 @@ Ruyi 的核心由以下几个部分组成：
 
 Ruyi 的强大能力离不开以下优秀的开源项目：
 
-*   **[imaging](https://github.com/disintegration/imaging)**: 提供核心的图片处理算法（缩放、旋转等）。
-*   **[golang.org/x/image](https://pkg.go.dev/golang.org/x/image)**: 提供 BMP, TIFF, WEBP 等格式的编解码支持。
-*   **[goheif](https://github.com/jdeng/goheif)**: 提供 HEIC 格式的纯 Go 解码支持。
-*   **[oksvg](https://github.com/srwiley/oksvg)**: 提供 SVG 格式的解析和渲染支持。
-*   **[golang-ico](https://github.com/biessek/golang-ico)**: 提供 ICO 格式的编解码支持。
+* **[imaging](https://github.com/disintegration/imaging)**: 提供核心的图片处理算法（缩放、旋转等）。
+* **[golang.org/x/image](https://pkg.go.dev/golang.org/x/image)**: 提供 BMP, TIFF, WEBP 等格式的编解码支持。
+* **[goheif](https://github.com/jdeng/goheif)**: 提供 HEIC 格式的纯 Go 解码支持。
+* **[oksvg](https://github.com/srwiley/oksvg)**: 提供 SVG 格式的解析和渲染支持。
+* **[golang-ico](https://github.com/biessek/golang-ico)**: 提供 ICO 格式的编解码支持。
+
+## 💻 开发指南
+
+### 常用命令
+
+* **编译**: `make build`
+* **运行测试**: `make test`
+* **生成依赖注入代码**: `make wire`
+* **格式化代码**: `make fmt`
+* **清理构建产物**: `make clean`
 
 ## 📄 许可证
 

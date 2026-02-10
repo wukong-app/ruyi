@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"image"
 	_ "image/png" // 注册 png 解码器
-	"math"
 	"strconv"
 
 	"github.com/wukong-app/ruyi/internal/core"
@@ -24,46 +23,7 @@ type pngToSvgConverter struct {
 
 func NewPNGToSVGConverter() contract.Converter {
 	params := contract.ConverterParams{}
-	params.Append(
-		contract.ConverterParam{
-			Name:     core.ParamWidth,
-			Desc:     "SVG 宽度，单位：像素。值为正整数，默认值为 0，表示使用图片原始宽度。",
-			Default:  "0",
-			Required: false,
-			Check: func(value string) error {
-				if value == "" {
-					return nil
-				}
-				v, err := strconv.ParseUint(value, 10, 64)
-				if err != nil {
-					return exception.Wrapf(err, "param value must be a positive integer")
-				}
-				if v >= math.MaxInt {
-					return exception.Errorf("param value must be less than %d", math.MaxInt)
-				}
-				return nil
-			},
-		},
-		contract.ConverterParam{
-			Name:     core.ParamHeight,
-			Desc:     "SVG 高度，单位：像素。值为正整数，默认值为 0，表示使用图片原始高度。",
-			Default:  "0",
-			Required: false,
-			Check: func(value string) error {
-				if value == "" {
-					return nil
-				}
-				v, err := strconv.ParseUint(value, 10, 64)
-				if err != nil {
-					return exception.Wrapf(err, "param value must be a positive integer")
-				}
-				if v >= math.MaxInt {
-					return exception.Errorf("param value must be less than %d", math.MaxInt)
-				}
-				return nil
-			},
-		},
-	)
+	params.Append(NewWidthParam(), NewHeightParam())
 
 	return &pngToSvgConverter{
 		params: params,

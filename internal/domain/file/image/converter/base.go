@@ -30,11 +30,11 @@ func NewBaseConverter(from, to contract.Concept, decode DecodeFunc, encode Encod
 	// 默认添加 Width 和 Height 参数
 	params := contract.ConverterParams{}
 	params.Append(NewWidthParam(), NewHeightParam())
-	
+
 	// 如果是 JPEG 相关的转换（通常 encodeFunc 需要 quality），可以由调用者通过 extraParams 传入 QualityParam
 	// 或者我们在这里判断？为了通用性，我们让调用者显式传递 QualityParam 如果他们需要。
 	// 但 Width/Height 是几乎所有图片转换都需要的。
-	
+
 	if len(extraParams) > 0 {
 		params.Append(extraParams...)
 	}
