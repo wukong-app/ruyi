@@ -108,6 +108,9 @@ func (s *heicToPngConverter) Convert(ctx context.Context, in []byte, params map[
 	// Resize
 	if width > 0 || height > 0 {
 		img = imaging.Resize(img, int(width), int(height), imaging.Lanczos)
+	} else {
+		// 强制转换为 NRGBA 格式，解决 goheif 返回 YCbCr 格式导致的 PNG 编码兼容性问题
+		img = imaging.Clone(img)
 	}
 
 	// Encode PNG
