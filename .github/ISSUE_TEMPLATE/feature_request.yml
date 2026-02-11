@@ -1,0 +1,39 @@
+name: ✨ Request new features
+description: Suggest an idea for this project / 提交新功能建议
+title: "[Feat] Please enter the title / 请输入功能标题"
+body:
+  - type: textarea
+    attributes:
+      label: In what scenarios do you need this feature? / 使用场景
+      description: |
+        Please describe the functions and application scenarios you expect as clearly and accurately as possible.
+        请尽可能清晰、准确地描述您期望的功能及其实际应用场景。
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Describe the optimal solution / 理想方案描述
+      description: |
+        Please try to describe the best solution. If there are similar tools implementing this feature, please list them.
+        请描述您认为最佳的解决方案。如果有其他类似软件已实现此功能，也请列出以供参考。
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Describe the candidate solution / 备选方案
+      description: |
+        Please describe acceptable alternative solutions.
+        请描述您可以接受的替代方案或折中方案。
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Other information / 其他信息
+      description: |
+        Please provide any additional information about this feature suggestion.
+        请提供关于此功能建议的任何补充信息。
+    validations:
+      required: false

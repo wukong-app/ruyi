@@ -1,0 +1,75 @@
+name: 🐛 Bug report
+description: Report defects to help us improve / 提交 Bug 反馈以帮助我们改进
+title: "[Bug] Please enter the title / 请输入 Bug 标题"
+body:
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this? / 是否已存在相同 Issue？
+      description: |
+        Please search to see if an issue already exists for the bug you encountered.
+        请先搜索现有的 Issue，确认该 Bug 是否已被报告。
+      options:
+        - label: | 
+            I have searched the existing issues / 我已搜索过现有 Issue
+          required: true
+
+  - type: textarea
+    attributes:
+      label: Describe the problem / 问题描述
+      description: |
+        Please describe the problem you are experiencing as clearly as possible.
+        请尽可能清晰地描述您遇到的问题。
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Steps to reproduce / 复现步骤
+      description: |
+        Please provide the steps to reproduce the bug.
+        请提供复现该 Bug 的详细步骤。
+      placeholder: |
+        1. Run command '...'
+        2. With input file '...'
+        3. See error '...'
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Expected result / 预期结果
+      description: |
+        Please describe the results you are looking for.
+        请描述您预期的正确结果。
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Screenshot or screen recording / 截图或录屏
+      description: |
+        Please attach screenshots or videos if they help describe the problem.
+        如果有助于描述问题，请提供截图或录屏。
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Version environment / 版本环境
+      value: |
+        - Ruyi Version: 
+        - OS (e.g. macOS 14.0, Windows 11): 
+        - Go Version (if used as library): 
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Log output / 日志输出
+      description: |
+        Please paste relevant log output or error messages here.
+        请在此粘贴相关的日志输出或错误信息。
+      render: shell
+    validations:
+      required: false

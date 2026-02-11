@@ -11,13 +11,78 @@ Ruyi 是一个基于 Go 语言开发的通用格式转换工具库。它采用�
 - **参数化控制**: 支持在转换过程中传递参数（如图片缩放、质量控制）。
 - **统一接口**: 通过统一的 Registry 和 Engine 进行管理，屏蔽底层差异。
 
-## 📦 安装
+## 📦 安装与下载
+
+### 1. 作为 Go 库使用
 
 ```bash
 go get github.com/wukong-app/ruyi
 ```
 
-## 🚀 快速开始
+### 2. 下载命令行工具 (CLI)
+
+我们为 **macOS**、**Linux** 和 **Windows** 提供了预编译的二进制文件。
+
+您可以前往 [Releases 页面](https://github.com/wukong-app/ruyi/releases) 下载最新版本。
+
+| 平台 | 架构 | 文件名 |
+| :--- | :--- | :--- |
+| **macOS** | Intel (amd64) | `ruyi-vX.Y.Z-darwin-amd64` |
+| **macOS** | Apple Silicon (arm64) | `ruyi-vX.Y.Z-darwin-arm64` |
+| **Linux** | amd64 | `ruyi-vX.Y.Z-linux-amd64` |
+| **Windows** | amd64 | `ruyi-vX.Y.Z-windows-amd64.exe` |
+
+*(注: `vX.Y.Z` 为版本号，请下载时替换为实际版本)*
+
+---
+
+## 💻 命令行工具 (CLI) 使用指南
+
+无需编写代码，直接使用命令行工具即可完成转换。
+
+### 🔹 macOS / Linux 使用方法
+
+1.  **下载** 对应系统的二进制文件。
+2.  **赋予执行权限** (仅首次)：
+    ```bash
+    chmod +x ruyi-v1.0.0-darwin-arm64  # 以 macOS arm64 为例
+    ```
+3.  **运行转换**：
+    ```bash
+    # 基本格式
+    ./ruyi-v1.0.0-darwin-arm64 -kind file -from <src> -to <tgt> -in <input> -out <output>
+    
+    # 示例：将 PNG 转为 JPEG 并调整大小
+    ./ruyi-v1.0.0-darwin-arm64 -kind file -from png -to jpeg \
+        -in input.png -out output.jpg \
+        --param "width=800;quality=90"
+    ```
+
+### 🔹 Windows 使用方法
+
+1.  **下载** `ruyi-vX.Y.Z-windows-amd64.exe`。
+2.  打开 **CMD** 或 **PowerShell**，进入文件所在目录。
+3.  **运行转换**：
+    ```powershell
+    # 基本格式
+    .\ruyi-vX.Y.Z-windows-amd64.exe -kind file -from <src> -to <tgt> -in <input> -out <output>
+    
+    # 示例：将 PNG 转为 ICO 图标
+    .\ruyi-v1.0.0-windows-amd64.exe -kind file -from png -to ico -in logo.png -out logo.ico
+    ```
+
+### ❓ 获取帮助
+
+如果不确定某个转换器支持哪些参数，可以使用 `--help`：
+
+```bash
+# 查询 SVG 转 PNG 的可用参数
+./ruyi -kind file -from svg -to png --help
+```
+
+---
+
+## 🚀 快速开始 (Go SDK)
 
 ### 1. 初始化引擎
 
@@ -110,37 +175,6 @@ fmt.Printf("Successfully converted %d bytes to %d bytes\n", len(inputBytes), len
 *提示：使用 CLI 工具时，可以通过 `go run cmd/ruyi/main.go -kind file -from <src> -to <tgt> --help`
 查看特定转换器的详细参数。*
 
-## 💻 命令行工具 (CLI)
-
-Ruyi 提供了一个方便的命令行工具，无需编写代码即可直接执行转换。
-
-### 使用方法
-
-```bash
-# 1. 运行 CLI 工具 (推荐)
-go run cmd/ruyi/main.go -kind file -from <src_format> -to <tgt_format> -in <input_path> -out <output_path> [params...]
-
-# 2. 查询特定转换器的支持参数
-go run cmd/ruyi/main.go -kind file -from <src_format> -to <tgt_format> --help
-```
-
-### 示例
-
-**1. 将 PNG 转换为 JPEG 并调整尺寸**
-
-```bash
-go run cmd/ruyi/main.go -kind file -from png -to jpeg \
-    -in test/testdata/shop.png \
-    -out output/shop.jpg \
-    --param "width=800;quality=90"
-```
-
-**2. 查询 SVG 转 PNG 的可用参数**
-
-```bash
-go run cmd/ruyi/main.go -kind file -from svg -to png --help
-```
-
 ---
 
 ## 🏗 架构概览
@@ -165,6 +199,7 @@ Ruyi 的强大能力离不开以下优秀的开源项目：
 * **[goheif](https://github.com/jdeng/goheif)**: 提供 HEIC 格式的纯 Go 解码支持。
 * **[oksvg](https://github.com/srwiley/oksvg)**: 提供 SVG 格式的解析和渲染支持。
 * **[golang-ico](https://github.com/biessek/golang-ico)**: 提供 ICO 格式的编解码支持。
+* **[SiYuan](https://github.com/siyuan-note/siyuan)**: 参考了其工程构建思路。
 
 ## 💻 开发指南
 
