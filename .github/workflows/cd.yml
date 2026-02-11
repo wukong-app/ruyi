@@ -131,6 +131,7 @@ jobs:
     permissions:
       contents: write
     strategy:
+      fail-fast: false
       matrix:
         config:
           - name: Build macOS (amd64)
@@ -173,13 +174,9 @@ jobs:
         run: |
           # Ensure dependencies and wire code are ready
           go mod tidy
-          # Install wire
-          go install github.com/google/wire/cmd/wire@latest
           
-          # Generate wire code
-          cd internal
-          wire
-          cd ..
+          # Generate wire code using Makefile to ensure consistency
+          make wire
           
           mkdir -p output/ruyi
           OUT_FILE="output/ruyi/ruyi-${{ matrix.config.suffix }}"
