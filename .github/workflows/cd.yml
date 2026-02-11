@@ -101,14 +101,20 @@ jobs:
              echo "Processing label: $LABEL"
              
              # Build query
+             # Note: We build the query parts carefully.
+             # We do NOT use quotes around $QUERY in the gh command below to ensure
+             # gh parses the qualifiers (repo:, label:, etc.) correctly rather than treating
+             # the whole string as a text search.
              QUERY="repo:${{ github.repository }} type:issue state:closed label:$LABEL"
              
              if [ ! -z "$LAST_DATE" ] && [ "$LAST_DATE" != "null" ]; then
                 QUERY="$QUERY closed:>$LAST_DATE"
              fi
              
+             echo "Running: gh search issues $QUERY"
+             
              # Fetch issues
-             ISSUES=$(gh search issues "$QUERY" --limit 100 --json title,url,number --template '{{range .}}- [{{.title}}]({{.url}}) #{{.number}}{{ "\n" }}{{end}}')
+             ISSUES=$(gh search issues $QUERY --limit 100 --json title,url,number --template '{{range .}}- [{{.title}}]({{.url}}) #{{.number}}{{ "\n" }}{{end}}')
              
              if [ ! -z "$ISSUES" ]; then
                 echo "$TITLE" >> $OUTPUT_FILE
