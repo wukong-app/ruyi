@@ -4,6 +4,19 @@
 
 Ruyi 是一个基于 Go 语言开发的通用格式转换工具库。它采用插件化架构，旨在为 `wukong` 项目提供强大、灵活且可扩展的数据转换核心。
 
+
+<p align="center">
+<a title="Build Status" target="_blank" href="https://github.com/wukong-app/ruyi/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/wukong-app/ruyi/cd.yml?style=flat-square"></a>
+<a title="Releases" target="_blank" href="https://github.com/wukong-app/ruyi/releases"><img src="https://img.shields.io/github/release/wukong-app/ruyi.svg?style=flat-square&color=9CF"></a>
+<br>
+<a title="Downloads" target="_blank" href="https://github.com/wukong-app/ruyi/releases"><img src="https://img.shields.io/github/downloads/wukong-app/ruyi/total.svg?style=flat-square&color=blueviolet"></a>
+<a title="Hits" target="_blank" href="https://github.com/wukong-app/ruyi"><img src="https://hits.b3log.org/wukong-app/ruyi.svg"></a>
+<a title="Code Size" target="_blank" href="https://github.com/wukong-app/ruyi"><img src="https://img.shields.io/github/languages/code-size/wukong-app/ruyi.svg?style=flat-square&color=yellow"></a>
+<br>
+<a title="GitHub Commits" target="_blank" href="https://github.com/wukong-app/ruyi/commits/main"><img src="https://img.shields.io/github/commit-activity/m/wukong-app/ruyi.svg?style=flat-square"></a>
+<a title="Last Commit" target="_blank" href="https://github.com/wukong-app/ruyi/commits/main"><img src="https://img.shields.io/github/last-commit/wukong-app/ruyi.svg?style=flat-square&color=FF9900"></a>
+<br><br>
+
 ## 🌟 核心特性
 
 - **插件化架构**: 转换逻辑封装为独立的 Converter，易于扩展和维护。
@@ -90,26 +103,26 @@ go get github.com/wukong-app/ruyi
 package main
 
 import (
-	"context"
-	"fmt"
-	"log"
+    "context"
+    "fmt"
+    "log"
 
-	"github.com/wukong-app/ruyi"
-	"github.com/wukong-app/ruyi/pkg/contract"
+    "github.com/wukong-app/ruyi"
+    "github.com/wukong-app/ruyi/pkg/contract"
 )
 
 func main() {
-	// 初始化 Ruyi 引擎
-	ry, err := ruyi.New()
-	if err != nil {
-		log.Fatalf("failed to create ruyi: %v", err)
-	}
+    // 初始化 Ruyi 引擎
+    ry, err := ruyi.New()
+    if err != nil {
+        log.Fatalf("failed to create ruyi: %v", err)
+    }
 
-	// 示例数据（实际使用时应为真实文件字节）
-	inputBytes := []byte("fake-jpeg-data")
-	ctx := context.Background()
+    // 示例数据（实际使用时应为真实文件字节）
+    inputBytes := []byte("fake-jpeg-data")
+    ctx := context.Background()
 
-	// ... 接下文
+    // ... 接下文
 }
 ```
 
@@ -117,27 +130,27 @@ func main() {
 
 ```go
     // 获取 JPEG 到 PNG 的转换器
-// contract.File 表示转换类型为文件
-// contract.JPEG 和 contract.PNG 分别表示源和目标格式
-converter, err := ry.GetConverter(ctx, contract.File, contract.JPEG, contract.PNG)
-if err != nil {
-log.Fatalf("converter not found: %v", err)
-}
-
-// 准备参数（可选）
-params := map[string]string{
-"width":  "200", // 目标宽度
-"height": "200", // 目标高度
-}
-
-// 执行转换
-outputBytes, err := converter.Convert(ctx, inputBytes, params)
-if err != nil {
-// 注意：这里的 inputBytes 是伪造的，实际运行会报错，需使用真实图片数据
-log.Printf("conversion failed (expected for fake data): %v", err)
-} else {
-fmt.Printf("Successfully converted %d bytes to %d bytes\n", len(inputBytes), len(outputBytes))
-}
+    // contract.File 表示转换类型为文件
+    // contract.JPEG 和 contract.PNG 分别表示源和目标格式
+    converter, err := ry.GetConverter(ctx, contract.File, contract.JPEG, contract.PNG)
+    if err != nil {
+        log.Fatalf("converter not found: %v", err)
+    }
+    
+    // 准备参数（可选）
+    params := map[string]string{
+        "width":  "200", // 目标宽度
+        "height": "200", // 目标高度
+    }
+    
+    // 执行转换
+    outputBytes, err := converter.Convert(ctx, inputBytes, params)
+    if err != nil {
+        // 注意：这里的 inputBytes 是伪造的，实际运行会报错，需使用真实图片数据
+        log.Printf("conversion failed (expected for fake data): %v", err)
+    } else {
+        fmt.Printf("Successfully converted %d bytes to %d bytes\n", len(inputBytes), len(outputBytes))
+    }
 ```
 
 ## 🔌 支持的转换
