@@ -193,7 +193,18 @@ jobs:
           OUT_FILE="output/ruyi/ruyi-${{ matrix.config.suffix }}"
           
           echo "Building for $GOOS/$GOARCH..."
-          go build -o $OUT_FILE cmd/ruyi/main.go
+          
+          # Common ldflags for release builds:
+          # -s: Omit the symbol table and debug information
+          # -w: Omit the DWARF symbol table
+          LDFLAGS="-s -w"
+          
+          # Use -static flag to avoid dependency on MinGW DLLs (libgcc, libstdc++, libwinpthread)
+          if [ "$GOOS" == "windows" ]; then
+             go build -ldflags "$LDFLAGS -extldflags '-static -static-libgcc -static-libstdc++'" -o $OUT_FILE cmd/ruyi/main.go
+          else
+             go build -ldflags "$LDFLAGS" -o $OUT_FILE cmd/ruyi/main.go
+          fi
           
           echo "artifact_path=$OUT_FILE" >> $GITHUB_OUTPUT
 
