@@ -16,6 +16,7 @@ jobs:
       issues: read
     outputs:
       release_tag: ${{ steps.release_info.outputs.tag_name }}
+      release_version: ${{ steps.release_info.outputs.release_version }}
       is_prerelease: ${{ steps.release_info.outputs.is_prerelease }}
     steps:
       - name: Checkout code
@@ -37,22 +38,35 @@ jobs:
       - name: Determine Release Info
         id: release_info
         run: |
-          TAG_NAME=${{ github.ref_name }}
-          echo "Tag: $TAG_NAME"
-          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
-          
-          if [[ "$TAG_NAME" == *"-dev"* ]]; then
-            echo "Detected Pre-release (Dev)"
-            echo "is_prerelease=true" >> $GITHUB_OUTPUT
-            export TZ='Asia/Shanghai'
-            TITLE=$(date +'v%Y%m%d%H%M')
-            echo "title=$TITLE" >> $GITHUB_OUTPUT
-            echo "release_type=Pre-release" >> $GITHUB_OUTPUT
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+             export TZ='Asia/Shanghai'
+             VERSION=$(date +'v%Y%m%d%H%M')
+             echo "Detected Manual Trigger"
+             echo "tag_name=$VERSION" >> $GITHUB_OUTPUT
+             echo "title=$VERSION" >> $GITHUB_OUTPUT
+             echo "release_version=$VERSION" >> $GITHUB_OUTPUT
+             echo "is_prerelease=true" >> $GITHUB_OUTPUT
+             echo "release_type=Manual-Build" >> $GITHUB_OUTPUT
           else
-            echo "Detected Formal Release"
-            echo "is_prerelease=false" >> $GITHUB_OUTPUT
-            echo "title=$TAG_NAME" >> $GITHUB_OUTPUT
-            echo "release_type=Release" >> $GITHUB_OUTPUT
+             TAG_NAME=${{ github.ref_name }}
+             echo "Tag: $TAG_NAME"
+             echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+             echo "release_version=$TAG_NAME" >> $GITHUB_OUTPUT
+             
+             if [[ "$TAG_NAME" == *"-dev"* ]]; then
+               echo "Detected Pre-release (Dev)"
+               echo "is_prerelease=true" >> $GITHUB_OUTPUT
+               export TZ='Asia/Shanghai'
+               # For dev tags, we still use the tag name as version, but maybe title could be different?
+               # User requested release_version to be the title.
+               echo "title=$TAG_NAME" >> $GITHUB_OUTPUT
+               echo "release_type=Pre-release" >> $GITHUB_OUTPUT
+             else
+               echo "Detected Formal Release"
+               echo "is_prerelease=false" >> $GITHUB_OUTPUT
+               echo "title=$TAG_NAME" >> $GITHUB_OUTPUT
+               echo "release_type=Release" >> $GITHUB_OUTPUT
+             fi
           fi
 
       - name: Generate Issue List
@@ -142,21 +156,26 @@ jobs:
             goos: darwin
             goarch: amd64
             suffix: darwin-amd64
+            ldflags: "-s -w"
           - name: Build macOS (arm64)
             os: macos-latest
             goos: darwin
             goarch: arm64
             suffix: darwin-arm64
+            ldflags: "-s -w"
           - name: Build Linux (amd64)
             os: ubuntu-latest
             goos: linux
             goarch: amd64
             suffix: linux-amd64
+            ldflags: "-s -w"
           - name: Build Windows (amd64)
             os: windows-latest
             goos: windows
             goarch: amd64
             suffix: windows-amd64.exe
+            # Use -static flag to avoid dependency on MinGW DLLs (libgcc, libstdc++, libwinpthread)
+            ldflags: "-s -w -extldflags '-static -static-libgcc -static-libstdc++'"
             
     steps:
       - name: Checkout code
@@ -190,21 +209,11 @@ jobs:
           cd ..
           
           mkdir -p output/ruyi
-          OUT_FILE="output/ruyi/ruyi-${{ matrix.config.suffix }}"
+          OUT_FILE="output/ruyi/ruyi-${{ needs.create_release.outputs.release_version }}-${{ matrix.config.suffix }}"
           
           echo "Building for $GOOS/$GOARCH..."
           
-          # Common ldflags for release builds:
-          # -s: Omit the symbol table and debug information
-          # -w: Omit the DWARF symbol table
-          LDFLAGS="-s -w"
-          
-          # Use -static flag to avoid dependency on MinGW DLLs (libgcc, libstdc++, libwinpthread)
-          if [ "$GOOS" == "windows" ]; then
-             go build -ldflags "$LDFLAGS -extldflags '-static -static-libgcc -static-libstdc++'" -o $OUT_FILE cmd/ruyi/main.go
-          else
-             go build -ldflags "$LDFLAGS" -o $OUT_FILE cmd/ruyi/main.go
-          fi
+          go build -ldflags "${{ matrix.config.ldflags }}" -o $OUT_FILE cmd/ruyi/main.go
           
           echo "artifact_path=$OUT_FILE" >> $GITHUB_OUTPUT
 
@@ -214,4 +223,4 @@ jobs:
           TAG_NAME: ${{ needs.create_release.outputs.release_tag }}
         run: |
           echo "Uploading asset to release $TAG_NAME..."
-          gh release upload $TAG_NAME output/ruyi/ruyi-${{ matrix.config.suffix }}
+          gh release upload $TAG_NAME output/ruyi/ruyi-${{ needs.create_release.outputs.release_version }}-${{ matrix.config.suffix }}
