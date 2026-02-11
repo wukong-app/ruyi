@@ -3,7 +3,8 @@ name: CD For Ruyi
 on:
   push:
     tags:
-      - 'v*'
+      - 'v[0-9]*.[0-9]*.[0-9]*'
+      - 'v[0-9]*.[0-9]*.[0-9]*-dev*'
   workflow_dispatch:
 
 jobs:
@@ -17,6 +18,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Verify Tag Format
+        run: |
+          TAG=${{ github.ref_name }}
+          echo "Verifying tag: $TAG"
+          # Strict Regex Validation
+          if [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Valid Release Tag"
+          elif [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-dev.*$ ]]; then
+            echo "Valid Pre-release Tag"
+          else
+            echo "Error: Invalid tag format. Only vX.Y.Z or vX.Y.Z-dev* are allowed."
+            exit 1
+          fi
 
       - name: Get Go version from go.mod
         id: go-version
@@ -39,12 +54,9 @@ jobs:
           TAG_NAME=${{ github.ref_name }}
           echo "Tag: $TAG_NAME"
           
-          # Check if tag contains '-dev'
           if [[ "$TAG_NAME" == *"-dev"* ]]; then
             echo "Detected Pre-release (Dev)"
             echo "is_prerelease=true" >> $GITHUB_OUTPUT
-            
-            # Generate timestamp title for dev builds
             export TZ='Asia/Shanghai'
             TITLE=$(date +'v%Y%m%d%H%M')
             echo "title=$TITLE" >> $GITHUB_OUTPUT
@@ -52,8 +64,6 @@ jobs:
           else
             echo "Detected Formal Release"
             echo "is_prerelease=false" >> $GITHUB_OUTPUT
-            
-            # Use tag name as title for formal releases
             echo "title=$TAG_NAME" >> $GITHUB_OUTPUT
             echo "release_type=Release" >> $GITHUB_OUTPUT
           fi
@@ -70,23 +80,42 @@ jobs:
           
           if [ -z "$LAST_RELEASE" ] || [ "$LAST_RELEASE" == "[]" ]; then
             LAST_DATE=""
-            LAST_TAG=""
+            echo "No previous release found. Searching all closed issues."
           else
             LAST_TAG=$(echo "$LAST_RELEASE" | jq -r '.[0].tagName')
             LAST_DATE=$(echo "$LAST_RELEASE" | jq -r '.[0].publishedAt')
+            echo "Last release: $LAST_TAG ($LAST_DATE)"
           fi
           
           OUTPUT_FILE="issue_list.md"
-          echo "### Completed Issues" > $OUTPUT_FILE
+          echo "" > $OUTPUT_FILE
           
-          if [ -z "$LAST_DATE" ] || [ "$LAST_DATE" == "null" ]; then
-             echo "> No previous formal release found. Listing recent closed issues." >> $OUTPUT_FILE
-             gh issue list --repo ${{ github.repository }} --state closed --limit 50 --json title,url,number --template '{{range .}}- [{{.title}}]({{.url}}) #{{.number}}{{ "\n" }}{{end}}' >> $OUTPUT_FILE
-          else
-             echo "> Since last formal release **$LAST_TAG** ($LAST_DATE)" >> $OUTPUT_FILE
-             # Search closed issues > LAST_DATE
-             gh search issues --repo ${{ github.repository }} --type issue --state closed --closed ">$LAST_DATE" --limit 100 --json title,url,number --template '{{range .}}- [{{.title}}]({{.url}}) #{{.number}}{{ "\n" }}{{end}}' >> $OUTPUT_FILE
-          fi
+          # Define labels and titles
+          LABELS=("enhancement" "bug" "refactor")
+          TITLES=("### Enhancement" "### Bug Fixes" "### Refactoring")
+          
+          for i in "${!LABELS[@]}"; do
+             LABEL="${LABELS[$i]}"
+             TITLE="${TITLES[$i]}"
+             
+             echo "Processing label: $LABEL"
+             
+             # Build query
+             QUERY="repo:${{ github.repository }} type:issue state:closed label:$LABEL"
+             
+             if [ ! -z "$LAST_DATE" ] && [ "$LAST_DATE" != "null" ]; then
+                QUERY="$QUERY closed:>$LAST_DATE"
+             fi
+             
+             # Fetch issues
+             ISSUES=$(gh search issues "$QUERY" --limit 100 --json title,url,number --template '{{range .}}- [{{.title}}]({{.url}}) #{{.number}}{{ "\n" }}{{end}}')
+             
+             if [ ! -z "$ISSUES" ]; then
+                echo "$TITLE" >> $OUTPUT_FILE
+                echo "$ISSUES" >> $OUTPUT_FILE
+                echo "" >> $OUTPUT_FILE
+             fi
+          done
           
           # Read file content into GITHUB_OUTPUT (multiline)
           {
@@ -104,12 +133,6 @@ jobs:
             ## Ruyi ${{ steps.release_info.outputs.release_type }} ${{ steps.release_info.outputs.title }}
             
             This is an automated build triggered by tag `${{ github.ref_name }}`.
-            
-            ### Build Details
-            - **Type:** ${{ steps.release_info.outputs.release_type }}
-            - **Tag:** `${{ github.ref_name }}`
-            - **Commit:** `${{ github.sha }}`
-            - **Go Version:** `${{ steps.go-version.outputs.version }}`
             
             ${{ steps.changelog.outputs.content }}
             
