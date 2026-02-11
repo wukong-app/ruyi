@@ -127,7 +127,10 @@ jobs:
   build:
     name: ${{ matrix.config.name }}
     needs: create_release
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.config.os }}
+    defaults:
+      run:
+        shell: bash
     permissions:
       contents: write
     strategy:
@@ -135,18 +138,22 @@ jobs:
       matrix:
         config:
           - name: Build macOS (amd64)
+            os: macos-latest
             goos: darwin
             goarch: amd64
             suffix: darwin-amd64
           - name: Build macOS (arm64)
+            os: macos-latest
             goos: darwin
             goarch: arm64
             suffix: darwin-arm64
           - name: Build Linux (amd64)
+            os: ubuntu-latest
             goos: linux
             goarch: amd64
             suffix: linux-amd64
           - name: Build Windows (amd64)
+            os: windows-latest
             goos: windows
             goarch: amd64
             suffix: windows-amd64.exe
@@ -171,18 +178,22 @@ jobs:
         env:
           GOOS: ${{ matrix.config.goos }}
           GOARCH: ${{ matrix.config.goarch }}
+          CGO_ENABLED: 1
         run: |
           # Ensure dependencies and wire code are ready
           go mod tidy
           
-          # Generate wire code using Makefile to ensure consistency
-          make wire
+          # Generate wire code
+          # We use explicit command instead of make to avoid dependency on make tool in Windows
+          cd internal
+          go run -mod=mod github.com/google/wire/cmd/wire
+          cd ..
           
           mkdir -p output/ruyi
           OUT_FILE="output/ruyi/ruyi-${{ matrix.config.suffix }}"
           
           echo "Building for $GOOS/$GOARCH..."
-          CGO_ENABLED=0 go build -o $OUT_FILE cmd/ruyi/main.go
+          go build -o $OUT_FILE cmd/ruyi/main.go
           
           echo "artifact_path=$OUT_FILE" >> $GITHUB_OUTPUT
 
